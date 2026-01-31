@@ -35,7 +35,7 @@ export async function generatePlan() {
     if (!recipesToPick || recipesToPick.length < 4) {
         // Fallback: If not enough cheap recipes, fetch all to avoid crash
         console.warn("Not enough recipes for budget filter, falling back to all.");
-        const { data: fallbackRecipes } = await supabase.from("recipes").select("id");
+        const { data: fallbackRecipes } = await supabase.from("recipes").select("id, price_estimated");
         if (!fallbackRecipes || fallbackRecipes.length < 4) {
             throw new Error("Not enough recipes found to generate a plan");
         }
