@@ -70,13 +70,30 @@ export default async function DashboardPage() {
             <div className="max-w-7xl mx-auto space-y-8">
 
                 <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
-                    <div>
-                        <h1 className="text-3xl md:text-5xl font-extrabold text-white tracking-tight uppercase italic">
-                            Smart<span className="text-primary">Dalle</span>
-                        </h1>
-                        <p className="text-muted-foreground mt-2 text-lg">
-                            Yo <span className="text-white font-bold capitalize">{pseudo}</span>, prêt à manger propre ?
-                        </p>
+                    <div className="flex-1">
+                        <div className="flex justify-between items-start w-full">
+                            <div>
+                                <h1 className="text-3xl md:text-5xl font-extrabold text-white tracking-tight uppercase italic">
+                                    Smart<span className="text-primary">Dalle</span>
+                                </h1>
+                                <p className="text-muted-foreground mt-2 text-lg">
+                                    Yo <span className="text-white font-bold capitalize">{pseudo}</span>, prêt à manger propre ?
+                                </p>
+                            </div>
+
+                            {/* Gamification Streak & Progress Link */}
+                            <div className="flex gap-4">
+                                <Link href="/progress">
+                                    <div className="flex flex-col items-center bg-card border border-input p-2 rounded-lg cursor-pointer hover:border-primary transition-colors">
+                                        <div className="flex items-center gap-1 text-orange-500 font-black text-xl">
+                                            <span className="text-2xl">🔥</span> 3
+                                        </div>
+                                        <span className="text-[10px] uppercase font-bold text-muted-foreground">Série</span>
+                                    </div>
+                                </Link>
+                            </div>
+                        </div>
+
                         {dailyPlan && (
                             <Link href="/shopping-list" className="inline-block mt-4 text-sm text-primary hover:text-white underline underline-offset-4 font-bold transition-colors">
                                 → Voir ma liste de courses
