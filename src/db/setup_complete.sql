@@ -55,8 +55,27 @@ alter table public.daily_plans enable row level security;
 create policy "Users can view their own plans" on public.daily_plans for select using (auth.uid() = user_id);
 create policy "Users can insert their own plans" on public.daily_plans for insert with check (auth.uid() = user_id);
 
+-- 4. TABLE WEIGHT_LOGS (Progress tracking)
+create table if not exists public.weight_logs (
+  id uuid default uuid_generate_v4() primary key,
+  user_id uuid references auth.users not null,
+  weight decimal not null,
+  date date default current_date not null,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
 
--- 4. SEED DATA (RECETTES)
+alter table public.weight_logs enable row level security;
+
+create policy "Users can view their own weight logs"
+  on public.weight_logs for select
+  using (auth.uid() = user_id);
+
+create policy "Users can insert their own weight logs"
+  on public.weight_logs for insert
+  with check (auth.uid() = user_id);
+
+
+-- 5. SEED DATA (RECETTES)
 INSERT INTO public.recipes (name, culture, image_url, price_estimated, calories, protein, carbs, fat, ingredients, instructions)
 VALUES 
   (

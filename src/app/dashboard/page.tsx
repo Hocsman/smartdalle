@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { generatePlan } from "./actions";
 import { DailyPlanView } from "@/components/daily-plan-view";
-import { Sparkles, Crown, History } from "lucide-react";
+import { Sparkles, Crown, History, User } from "lucide-react";
 import Link from "next/link";
 import { AiGeneratorButton } from "@/components/ai-generator-button";
 import { DashboardRecipesClient } from "@/components/dashboard-recipes-client";
@@ -99,6 +99,12 @@ export default async function DashboardPage() {
                             {/* Gamification Streak & History Link */}
                             <div className="flex gap-3">
                                 <NotificationButton />
+                                <Link href="/profile">
+                                    <div className="flex flex-col items-center bg-card border border-input p-2 rounded-lg cursor-pointer hover:border-primary transition-colors">
+                                        <User className="h-5 w-5 text-primary" />
+                                        <span className="text-[10px] uppercase font-bold text-muted-foreground">Profil</span>
+                                    </div>
+                                </Link>
                                 <Link href="/history">
                                     <div className="flex flex-col items-center bg-card border border-input p-2 rounded-lg cursor-pointer hover:border-primary transition-colors">
                                         <History className="h-5 w-5 text-primary" />
