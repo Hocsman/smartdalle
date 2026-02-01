@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { generatePlan } from "./actions";
 import { DailyPlanView } from "@/components/daily-plan-view";
-import { Sparkles, Crown, History, User, ShoppingCart } from "lucide-react";
+import { Sparkles, Crown, History, User, ShoppingCart, Heart } from "lucide-react";
 import Link from "next/link";
 import { AiGeneratorButton } from "@/components/ai-generator-button";
 import { DashboardRecipesClient } from "@/components/dashboard-recipes-client";
@@ -103,6 +103,12 @@ export default async function DashboardPage() {
                                     <div className="flex flex-col items-center bg-card border border-input p-2 rounded-lg cursor-pointer hover:border-primary transition-colors">
                                         <ShoppingCart className="h-5 w-5 text-primary" />
                                         <span className="text-[10px] uppercase font-bold text-muted-foreground">Courses</span>
+                                    </div>
+                                </Link>
+                                <Link href="/favorites">
+                                    <div className="flex flex-col items-center bg-card border border-input p-2 rounded-lg cursor-pointer hover:border-primary transition-colors">
+                                        <Heart className="h-5 w-5 text-primary" />
+                                        <span className="text-[10px] uppercase font-bold text-muted-foreground">Favoris</span>
                                     </div>
                                 </Link>
                                 <Link href="/profile">

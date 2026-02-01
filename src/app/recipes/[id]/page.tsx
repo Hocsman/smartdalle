@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ArrowLeft, Utensils, Flame, Euro } from "lucide-react";
 import { AiGeneratorButton } from "@/components/ai-generator-button";
 import { RecipeTabsSection } from "./recipe-tabs-section";
+import { FavoriteButton } from "@/components/favorite-button";
 
 interface RecipePageProps {
     params: Promise<{
@@ -25,6 +26,16 @@ export default async function RecipePage({ params }: RecipePageProps) {
     if (user) {
         const { data: profile } = await supabase.from("profiles").select("is_premium").eq("id", user.id).single();
         isPremium = profile?.is_premium || false;
+    }
+    let isFavorite = false;
+    if (user) {
+        const { data: favoriteRows } = await supabase
+            .from("favorites")
+            .select("id")
+            .eq("user_id", user.id)
+            .eq("recipe_id", id)
+            .limit(1);
+        isFavorite = !!favoriteRows && favoriteRows.length > 0;
     }
 
     const { data: recipe } = await supabase
@@ -80,12 +91,15 @@ export default async function RecipePage({ params }: RecipePageProps) {
                 </Link>
 
                 {/* AI Generator Button (Top Right) */}
-                <div className="absolute top-6 right-6 z-20">
+                <div className="absolute top-6 right-6 z-20 flex gap-3">
                     <AiGeneratorButton
                         recipeId={recipe.id}
                         recipeName={recipe.name}
                         isPremium={isPremium}
                     />
+                    {user ? (
+                        <FavoriteButton recipeId={recipe.id} initialFavorite={isFavorite} />
+                    ) : null}
                 </div>
 
                 {/* Title over Hero */}
