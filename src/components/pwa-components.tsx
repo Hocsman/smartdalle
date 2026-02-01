@@ -5,11 +5,15 @@ import { Wifi, WifiOff } from "lucide-react";
 
 export function ServiceWorkerRegistration() {
     useEffect(() => {
-        if (typeof window !== "undefined" && "serviceWorker" in navigator && process.env.NODE_ENV === "production") {
+        if (
+            typeof window !== "undefined" &&
+            "serviceWorker" in navigator &&
+            process.env.NODE_ENV === "production"
+        ) {
             navigator.serviceWorker
                 .register("/sw.js")
                 .then((registration) => {
-                    console.log("SW registered:", registration.scope);
+                    console.log("SW registered scope:", registration.scope);
                 })
                 .catch((error) => {
                     console.error("SW registration failed:", error);
@@ -26,36 +30,31 @@ export function OnlineIndicator() {
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
-        // Mark as mounted (client-side only)
         setMounted(true);
-
-        // Set initial state only on client
         if (typeof window !== "undefined") {
             setIsOnline(navigator.onLine);
+
+            const handleOnline = () => {
+                setIsOnline(true);
+                setShowIndicator(true);
+                setTimeout(() => setShowIndicator(false), 3000);
+            };
+
+            const handleOffline = () => {
+                setIsOnline(false);
+                setShowIndicator(true);
+            };
+
+            window.addEventListener("online", handleOnline);
+            window.addEventListener("offline", handleOffline);
+
+            return () => {
+                window.removeEventListener("online", handleOnline);
+                window.removeEventListener("offline", handleOffline);
+            };
         }
-
-        const handleOnline = () => {
-            setIsOnline(true);
-            setShowIndicator(true);
-            // Hide after 3 seconds
-            setTimeout(() => setShowIndicator(false), 3000);
-        };
-
-        const handleOffline = () => {
-            setIsOnline(false);
-            setShowIndicator(true);
-        };
-
-        window.addEventListener("online", handleOnline);
-        window.addEventListener("offline", handleOffline);
-
-        return () => {
-            window.removeEventListener("online", handleOnline);
-            window.removeEventListener("offline", handleOffline);
-        };
     }, []);
 
-    // Don't render anything on server or if online and indicator should be hidden
     if (!mounted || (isOnline && !showIndicator)) return null;
 
     return (
