@@ -7,14 +7,15 @@ import Link from "next/link";
 import { ArrowLeft, Clock, Flame, Utensils, Wallet } from "lucide-react";
 
 interface RecipePageProps {
-    params: {
+    params: Promise<{
         id: string;
-    };
+    }>;
 }
 
 export const dynamic = "force-dynamic";
 
-export default async function RecipePage({ params: { id } }: RecipePageProps) {
+export default async function RecipePage({ params }: RecipePageProps) {
+    const { id } = await params;
     const supabase = await createClient();
 
     const { data: recipe } = await supabase
