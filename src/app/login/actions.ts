@@ -5,8 +5,6 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 
 export async function login(formData: FormData) {
-    const supabase = await createClient();
-
     const data = {
         email: formData.get("email") as string,
         password: formData.get("password") as string,
@@ -15,6 +13,7 @@ export async function login(formData: FormData) {
     let error;
 
     try {
+        const supabase = await createClient();
         const { error: signInError } = await supabase.auth.signInWithPassword(data);
         error = signInError;
     } catch (e) {
@@ -32,8 +31,6 @@ export async function login(formData: FormData) {
 }
 
 export async function signup(formData: FormData) {
-    const supabase = await createClient();
-
     const data = {
         email: formData.get("email") as string,
         password: formData.get("password") as string,
@@ -42,6 +39,7 @@ export async function signup(formData: FormData) {
     let error;
 
     try {
+        const supabase = await createClient();
         const { error: signUpError } = await supabase.auth.signUp(data);
         error = signUpError;
     } catch (e) {
