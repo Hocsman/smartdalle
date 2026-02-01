@@ -19,7 +19,8 @@ export type GeneratedRecipe = {
 };
 
 type AiResponse = {
-    name: string;
+    name?: string;
+    nom?: string;
     ingredients: string[] | string;
     instructions: string;
     macros: {
@@ -57,7 +58,7 @@ export async function generateRecipe(): Promise<GeneratedRecipe> {
     const objectif = profile?.objectif || "maintien";
 
     const systemPrompt = `Tu es un chef street-food expert en nutrition sportive. Génère une recette pour un profil ${objectif} avec un budget ${budget}.
-Format de réponse : JSON strict (nom, ingredients, instructions, macros, prix_estime, emoji).
+Format de réponse : JSON strict avec ces clés EXACTES (name, ingredients, instructions, macros, prix_estime, emoji).
 Ton : Motivant, tutoiement, style urbain.`;
 
     const openai = getOpenAIClient();
@@ -89,17 +90,41 @@ Ton : Motivant, tutoiement, style urbain.`;
             ? [parsed.ingredients]
             : [];
 
+    const name = parsed.name || parsed.nom;
+    if (!name) {
+        throw new Error("OPENAI_MISSING_NAME");
+    }
+
+    const toNumber = (value: unknown) => {
+        if (typeof value === "number") return value;
+        if (typeof value === "string") {
+            const cleaned = value.replace(",", ".").replace(/[^\d.]/g, "");
+            const num = Number.parseFloat(cleaned);
+            return Number.isFinite(num) ? num : 0;
+        }
+        return 0;
+    };
+
+    const macros = {
+        protein: toNumber(parsed.macros?.protein),
+        carbs: toNumber(parsed.macros?.carbs),
+        fat: toNumber(parsed.macros?.fat),
+        calories: toNumber(parsed.macros?.calories),
+    };
+
+    const prixEstime = toNumber(parsed.prix_estime);
+
     const { data: insertedRecipe, error } = await supabase
         .from("recipes")
         .insert({
-            name: parsed.name,
+            name,
             culture: "IA",
             image_url: null,
-            price_estimated: parsed.prix_estime,
-            calories: parsed.macros?.calories ?? null,
-            protein: parsed.macros?.protein ?? null,
-            carbs: parsed.macros?.carbs ?? null,
-            fat: parsed.macros?.fat ?? null,
+            price_estimated: prixEstime || null,
+            calories: macros.calories || null,
+            protein: macros.protein || null,
+            carbs: macros.carbs || null,
+            fat: macros.fat || null,
             ingredients,
             instructions: parsed.instructions,
         })
@@ -107,21 +132,17 @@ Ton : Motivant, tutoiement, style urbain.`;
         .single();
 
     if (error || !insertedRecipe) {
+        console.error("DB insert error:", error);
         throw new Error("DB_INSERT_FAILED");
     }
 
     return {
         id: insertedRecipe.id,
-        name: parsed.name,
+        name,
         ingredients,
         instructions: parsed.instructions,
-        macros: {
-            protein: parsed.macros?.protein ?? 0,
-            carbs: parsed.macros?.carbs ?? 0,
-            fat: parsed.macros?.fat ?? 0,
-            calories: parsed.macros?.calories ?? 0,
-        },
-        prix_estime: parsed.prix_estime,
+        macros,
+        prix_estime: prixEstime,
         emoji: parsed.emoji || "🍽️",
     };
 }
