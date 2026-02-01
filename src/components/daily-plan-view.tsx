@@ -1,5 +1,6 @@
 import { RecipeCard } from "@/components/recipe-card";
 import { Badge } from "@/components/ui/badge";
+import PlanningPdfButton from "@/components/planning-pdf-button";
 
 interface PlanProps {
     plan: any; // Using any for speed, ideally typed properly with detailed join
@@ -35,9 +36,12 @@ export function DailyPlanView({ plan, recipes }: PlanProps) {
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-500">
             <div className="bg-card/50 border border-input rounded-xl p-6 flex flex-wrap justify-between items-center gap-4">
-                <div>
-                    <h2 className="text-2xl font-bold text-white">Menu du Jour</h2>
-                    <p className="text-muted-foreground">{plan.date}</p>
+                <div className="flex items-start gap-4">
+                    <div>
+                        <h2 className="text-2xl font-bold text-white">Menu du Jour</h2>
+                        <p className="text-muted-foreground">{plan.date}</p>
+                    </div>
+                    <PlanningPdfButton plan={plan} recipes={recipes} />
                 </div>
                 <div className="flex gap-4">
                     <div className="text-center">

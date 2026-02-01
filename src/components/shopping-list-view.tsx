@@ -9,26 +9,8 @@ interface ShoppingListViewProps {
     ingredients: string[];
 }
 
-// Categories for ingredient organization
-const CATEGORIES: { name: string; emoji: string; keywords: string[] }[] = [
-    { name: "Viandes & Poissons", emoji: "🥩", keywords: ["poulet", "boeuf", "poisson", "saumon", "thon", "crevette", "viande", "steak", "dinde", "agneau", "porc", "merguez", "kefta"] },
-    { name: "Fruits & Légumes", emoji: "🥬", keywords: ["tomate", "oignon", "ail", "citron", "avocat", "banane", "pomme", "carotte", "courgette", "poivron", "salade", "épinard", "mangue", "concombre", "aubergine", "haricot", "petit pois", "coriandre", "persil", "menthe", "gingembre", "patate", "igname", "plantain", "gombo"] },
-    { name: "Féculents & Céréales", emoji: "🍚", keywords: ["riz", "pâte", "semoule", "couscous", "pain", "quinoa", "avoine", "blé", "maïs", "farine", "boulgour", "manioc", "fonio", "attieke"] },
-    { name: "Produits Laitiers", emoji: "🧀", keywords: ["lait", "fromage", "yaourt", "crème", "beurre", "oeuf", "feta", "mozzarella"] },
-    { name: "Épices & Condiments", emoji: "🌶️", keywords: ["sel", "poivre", "cumin", "paprika", "curry", "piment", "ras el hanout", "harissa", "curcuma", "cannelle", "huile", "vinaigre", "moutarde", "sauce", "bouillon", "épice"] },
-    { name: "Légumineuses", emoji: "🫘", keywords: ["lentille", "pois chiche", "haricot rouge", "haricot blanc", "fève"] },
-    { name: "Autres", emoji: "📦", keywords: [] },
-];
-
-function categorizeIngredient(ingredient: string): string {
-    const lower = ingredient.toLowerCase();
-    for (const cat of CATEGORIES) {
-        if (cat.keywords.some((kw) => lower.includes(kw))) {
-            return cat.name;
-        }
-    }
-    return "Autres";
-}
+import { categorizeIngredient, CATEGORIES } from "@/utils/categories";
+import PdfExportButton from "@/components/pdf-export-button";
 
 export default function ShoppingListView({ ingredients }: ShoppingListViewProps) {
     // Dedupe ingredients
@@ -111,6 +93,7 @@ export default function ShoppingListView({ ingredients }: ShoppingListViewProps)
                             </div>
                         </div>
                         <div className="flex gap-2">
+                            <PdfExportButton ingredients={ingredients} />
                             <Button
                                 variant="outline"
                                 size="sm"
