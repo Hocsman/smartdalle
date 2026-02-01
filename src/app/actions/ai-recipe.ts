@@ -21,7 +21,7 @@ export async function generateAiRecipe() {
     // Fetch User Preferences AND Premium Status
     const { data: profile } = await supabase
         .from("profiles")
-        .select("budget_level, objective, is_premium")
+        .select("budget_level, objectif, culture, is_premium")
         .eq("id", user.id)
         .single();
 
@@ -31,28 +31,46 @@ export async function generateAiRecipe() {
     }
 
     const budgetState = profile?.budget_level === 'eco' ? 'très économique (moins de 3 euros)' : 'standard';
-    const objectiveState = profile?.objective || 'santé';
+    const objectiveState = profile?.objectif || 'santé';
+    const cultureState = profile?.culture || 'mix';
+
+    // Map culture to cuisine style
+    const cultureMap: Record<string, string> = {
+        'africaine': 'Africaine (Mafé, Yassa, Thieboudienne...)',
+        'antillaise': 'Antillaise/Créole (Colombo, Accras, Gratin...)',
+        'maghrebine': 'Maghrébine (Tajine, Couscous, Shakshuka...)',
+        'francaise': 'Française (Blanquette, Quiche, Bourguignon...)',
+        'classique': 'Fusion Healthy internationale',
+        'mix': 'Mix de toutes les cultures'
+    };
+    const cultureDescription = cultureMap[cultureState] || 'Mix de toutes les cultures';
 
     // Strict System Prompt
     const systemPrompt = `
     Tu es un chef cuisinier "Street Food Healthy" expert pour les jeunes urbains.
     Ton but : Inventer une recette UNIQUE, créative, et adaptée au profil.
-    Profil : Budget ${budgetState}, Objectif ${objectiveState}.
-    Ton : Fun, direct, motivant.
+    
+    PROFIL UTILISATEUR :
+    - Budget : ${budgetState}
+    - Objectif : ${objectiveState}
+    - Culture culinaire préférée : ${cultureDescription}
+    
+    Ton : Fun, direct, motivant (style street).
     
     IMPORTANT: Tu dois répondre UNIQUEMENT avec un JSON valide respectant cette structure EXACTE :
     {
       "name": "Nom de la recette (Fun et court)",
-      "culture": "Une culture (ex: Afro, Cajun, Asian, French, Creole)",
+      "culture": "La culture de la recette (ex: Africaine, Maghrébine, Antillaise, Française, Créole, Healthy)",
       "price_estimated": number (prix estimé en euros, float),
       "calories": number (int),
       "protein": number (int),
       "carbs": number (int),
       "fat": number (int),
-      "ingredients": ["ingrédient 1", "ingrédient 2"...],
-      "instructions": "Texte complet des instructions, formaté avec des sauts de ligne, étape par étape, sur un ton motivant."
+      "ingredients": ["ingrédient 1 avec quantité", "ingrédient 2 avec quantité"...],
+      "instructions": "Texte complet des instructions, formaté avec des numéros d'étapes, sur un ton motivant."
     }
-    Donne des valeurs réalistes pour les macros. L'image sera gérée ailleurs, laisse vide ou générique.
+    
+    Adapte la recette à la culture préférée de l'utilisateur. Donne des valeurs réalistes pour les macros.
   `;
 
     try {
