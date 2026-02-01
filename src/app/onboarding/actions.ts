@@ -7,6 +7,8 @@ export async function saveProfile(formData: {
     objective: string;
     budget: string;
     weight: number;
+    height: number;
+    age_range: string;
 }) {
     const supabase = await createClient();
     const {
@@ -33,6 +35,8 @@ export async function saveProfile(formData: {
         objectif: formData.objective,
         budget_level: formData.budget,
         calories_target: Math.round(calorieTarget),
+        height: formData.height,
+        age_range: formData.age_range,
         updated_at: new Date().toISOString(),
     });
 

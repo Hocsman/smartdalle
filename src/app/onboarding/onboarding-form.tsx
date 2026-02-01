@@ -16,6 +16,8 @@ export default function OnboardingForm() {
         objective: "",
         budget: "",
         weight: "",
+        height: "",
+        age_range: "",
     });
     const [loading, setLoading] = useState(false);
 
@@ -33,6 +35,8 @@ export default function OnboardingForm() {
                 objective: formData.objective,
                 budget: formData.budget,
                 weight: parseFloat(formData.weight),
+                height: parseInt(formData.height),
+                age_range: formData.age_range,
             });
         } catch (error) {
             console.error(error);
@@ -105,22 +109,59 @@ export default function OnboardingForm() {
                 {step === 3 && (
                     <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
                         <h2 className="text-3xl font-bold text-white text-center">Tes infos</h2>
-                        <Card className="bg-card/50 border-input max-w-sm mx-auto">
-                            <CardContent className="pt-6">
-                                <div className="space-y-4">
-                                    <div className="space-y-2">
-                                        <Label className="text-white text-lg">Poids actuel (kg)</Label>
-                                        <Input
-                                            type="number"
-                                            placeholder="ex: 75"
-                                            value={formData.weight}
-                                            onChange={(e) => handleSelection("weight", e.target.value)}
-                                            className="bg-secondary border-none text-white text-xl p-6"
-                                        />
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
+
+                        {/* Weight & Height Inputs */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-md mx-auto">
+                            <div className="space-y-2">
+                                <Label className="text-white text-lg">Poids (kg)</Label>
+                                <Input
+                                    type="number"
+                                    placeholder="ex: 75"
+                                    value={formData.weight}
+                                    onChange={(e) => handleSelection("weight", e.target.value)}
+                                    className="bg-secondary border-none text-white text-xl p-6"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label className="text-white text-lg">Taille (cm)</Label>
+                                <Input
+                                    type="number"
+                                    placeholder="ex: 175"
+                                    value={formData.height}
+                                    onChange={(e) => handleSelection("height", e.target.value)}
+                                    className="bg-secondary border-none text-white text-xl p-6"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Age Range Selection */}
+                        <div className="space-y-4 pt-4">
+                            <h3 className="text-xl font-bold text-white text-center">Dans quelle tranche d'âge ?</h3>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                {(["16-29", "30-49", "50-69", "70+"] as const).map((range) => (
+                                    <Card
+                                        key={range}
+                                        onClick={() => handleSelection("age_range", range)}
+                                        className={`cursor-pointer transition-all duration-200 border-2 ${formData.age_range === range
+                                            ? "bg-primary border-primary"
+                                            : "bg-card/50 border-input hover:border-primary/50"
+                                            }`}
+                                    >
+                                        <CardContent className="flex flex-col items-center justify-center p-4 text-center">
+                                            <span className={`text-3xl mb-2`}>
+                                                {range === "16-29" && "🛹"}
+                                                {range === "30-49" && "💼"}
+                                                {range === "50-69" && "📚"}
+                                                {range === "70+" && "🌳"}
+                                            </span>
+                                            <span className={`font-bold text-lg ${formData.age_range === range ? "text-black" : "text-white"}`}>
+                                                {range === "70+" ? "70 ans +" : `${range} ans`}
+                                            </span>
+                                        </CardContent>
+                                    </Card>
+                                ))}
+                            </div>
+                        </div>
                     </div>
                 )}
             </div>
@@ -147,7 +188,7 @@ export default function OnboardingForm() {
                 ) : (
                     <Button
                         onClick={handleSubmit}
-                        disabled={!formData.weight || loading}
+                        disabled={!formData.weight || !formData.height || !formData.age_range || loading}
                         className="text-lg font-bold px-8 bg-primary text-black hover:bg-primary/90"
                     >
                         {loading ? "Génération en cours..." : "Valider mon profil"} <Check className="ml-2 w-5 h-5" />
@@ -175,8 +216,8 @@ function SelectionCard({
         <Card
             onClick={onClick}
             className={`cursor-pointer transition-all duration-200 border-2 ${selected
-                    ? "bg-primary border-primary" // Full yellow implementation when selected
-                    : "bg-card/50 border-input hover:border-primary/50"
+                ? "bg-primary border-primary" // Full yellow implementation when selected
+                : "bg-card/50 border-input hover:border-primary/50"
                 }`}
         >
             <CardContent className="flex flex-col items-center justify-center p-6 text-center h-full">
