@@ -1,11 +1,23 @@
-import Stripe from 'stripe';
+import Stripe from "stripe";
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
-    apiVersion: '2025-01-27.acacia' as any,
-    typescript: true,
-});
+let cachedStripe: Stripe | null = null;
+
+export function getStripeClient() {
+    const apiKey = process.env.STRIPE_SECRET_KEY;
+    if (!apiKey) {
+        throw new Error("STRIPE_SECRET_KEY is not configured");
+    }
+    if (!cachedStripe) {
+        cachedStripe = new Stripe(apiKey, {
+            apiVersion: "2025-01-27.acacia" as any,
+            typescript: true,
+        });
+    }
+    return cachedStripe;
+}
 
 export const getStripeSession = async (priceId: string, userId: string, userEmail: string) => {
+    const stripe = getStripeClient();
     const session = await stripe.checkout.sessions.create({
         mode: 'subscription',
         payment_method_types: ['card'],
