@@ -9,6 +9,7 @@ import { AiGeneratorButton } from "@/components/ai-generator-button";
 import { DashboardRecipesClient } from "@/components/dashboard-recipes-client";
 import { getFavoriteIds } from "@/app/actions/favorites";
 import { NotificationButton } from "@/components/notification-settings";
+import { GenerateButton } from "@/components/GenerateButton";
 
 export const dynamic = "force-dynamic";
 
@@ -138,6 +139,14 @@ export default async function DashboardPage() {
                         </div>
                     )}
                 </header>
+
+                <section>
+                    <div className="flex items-center gap-2 mb-4">
+                        <span className="w-2 h-8 bg-yellow-400 rounded-sm inline-block"></span>
+                        <h2 className="text-2xl font-bold text-white">Recette IA du Jour</h2>
+                    </div>
+                    <GenerateButton />
+                </section>
 
                 {dailyPlan && plannedRecipes ? (
                     <section>
