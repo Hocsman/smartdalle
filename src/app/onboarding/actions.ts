@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 export async function saveProfile(formData: {
     objective: string;
     budget: string;
+    culture: string;
     weight: number;
     height: number;
     age_range: string;
@@ -34,6 +35,7 @@ export async function saveProfile(formData: {
         email: user.email,
         objectif: formData.objective,
         budget_level: formData.budget,
+        culture: formData.culture,
         calories_target: Math.round(calorieTarget),
         height: formData.height,
         age_range: formData.age_range,

@@ -5,16 +5,17 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Dumbbell, TrendingDown, Scale, Wallet, PiggyBank, ArrowRight, Check } from "lucide-react";
+import { Dumbbell, TrendingDown, Scale, Wallet, PiggyBank, ArrowRight, Check, Globe, Palmtree, ChefHat, Shuffle } from "lucide-react";
 import { saveProfile } from "./actions";
 
-type Step = 1 | 2 | 3;
+type Step = 1 | 2 | 3 | 4;
 
 export default function OnboardingForm() {
     const [step, setStep] = useState<Step>(1);
     const [formData, setFormData] = useState({
         objective: "",
         budget: "",
+        culture: "",
         weight: "",
         height: "",
         age_range: "",
@@ -25,8 +26,8 @@ export default function OnboardingForm() {
         setFormData((prev) => ({ ...prev, [key]: value }));
     };
 
-    const nextStep = () => setStep((prev) => (prev < 3 ? (prev + 1 as Step) : prev));
-    const prevStep = () => setStep((prev) => (prev > 1 ? (prev - 1 as Step) : prev));
+    const nextStep = () => setStep((prev) => (prev < 4 ? ((prev + 1) as Step) : prev));
+    const prevStep = () => setStep((prev) => (prev > 1 ? ((prev - 1) as Step) : prev));
 
     const handleSubmit = async () => {
         setLoading(true);
@@ -34,6 +35,7 @@ export default function OnboardingForm() {
             await saveProfile({
                 objective: formData.objective,
                 budget: formData.budget,
+                culture: formData.culture,
                 weight: parseFloat(formData.weight),
                 height: parseInt(formData.height),
                 age_range: formData.age_range,
@@ -48,7 +50,7 @@ export default function OnboardingForm() {
         <div className="w-full max-w-2xl mx-auto space-y-8">
             {/* Progress Indicator */}
             <div className="flex gap-2 mb-8">
-                {[1, 2, 3].map((i) => (
+                {[1, 2, 3, 4].map((i) => (
                     <div
                         key={i}
                         className={`h-2 flex-1 rounded-full transition-colors ${i <= step ? "bg-primary" : "bg-secondary"
@@ -58,6 +60,7 @@ export default function OnboardingForm() {
             </div>
 
             <div className="space-y-6">
+                {/* STEP 1: Objectif */}
                 {step === 1 && (
                     <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
                         <h2 className="text-3xl font-bold text-white text-center">Ton Objectif ?</h2>
@@ -84,6 +87,7 @@ export default function OnboardingForm() {
                     </div>
                 )}
 
+                {/* STEP 2: Budget */}
                 {step === 2 && (
                     <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
                         <h2 className="text-3xl font-bold text-white text-center">Ton Budget ?</h2>
@@ -106,7 +110,42 @@ export default function OnboardingForm() {
                     </div>
                 )}
 
+                {/* STEP 3: Culture */}
                 {step === 3 && (
+                    <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
+                        <h2 className="text-3xl font-bold text-white text-center">Ta Culture Culinaire ?</h2>
+                        <p className="text-muted-foreground text-center">On adapte les recettes à tes goûts</p>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <SelectionCard
+                                label="Africaine"
+                                icon={<Globe className="w-8 h-8" />}
+                                selected={formData.culture === "africaine"}
+                                onClick={() => handleSelection("culture", "africaine")}
+                            />
+                            <SelectionCard
+                                label="Antillaise"
+                                icon={<Palmtree className="w-8 h-8" />}
+                                selected={formData.culture === "antillaise"}
+                                onClick={() => handleSelection("culture", "antillaise")}
+                            />
+                            <SelectionCard
+                                label="Classique"
+                                icon={<ChefHat className="w-8 h-8" />}
+                                selected={formData.culture === "classique"}
+                                onClick={() => handleSelection("culture", "classique")}
+                            />
+                            <SelectionCard
+                                label="Mix"
+                                icon={<Shuffle className="w-8 h-8" />}
+                                selected={formData.culture === "mix"}
+                                onClick={() => handleSelection("culture", "mix")}
+                            />
+                        </div>
+                    </div>
+                )}
+
+                {/* STEP 4: Infos personnelles */}
+                {step === 4 && (
                     <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
                         <h2 className="text-3xl font-bold text-white text-center">Tes infos</h2>
 
@@ -136,7 +175,7 @@ export default function OnboardingForm() {
 
                         {/* Age Range Selection */}
                         <div className="space-y-4 pt-4">
-                            <h3 className="text-xl font-bold text-white text-center">Dans quelle tranche d'âge ?</h3>
+                            <h3 className="text-xl font-bold text-white text-center">Dans quelle tranche d&apos;âge ?</h3>
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                 {(["16-29", "30-49", "50-69", "70+"] as const).map((range) => (
                                     <Card
@@ -168,20 +207,22 @@ export default function OnboardingForm() {
 
             <div className="flex justify-between pt-8">
                 {step > 1 ? (
-                    <Button variant="ghost" onClick={prevStep} className="text-muted-foreground hover:text-white">
+                    <Button variant="ghost" onClick={prevStep} className="text-muted-foreground hover:text-white cursor-pointer">
                         Retour
                     </Button>
                 ) : (
                     <div /> /* Spacer */
                 )}
 
-                {step < 3 ? (
+                {step < 4 ? (
                     <Button
                         onClick={nextStep}
                         disabled={
-                            (step === 1 && !formData.objective) || (step === 2 && !formData.budget)
+                            (step === 1 && !formData.objective) ||
+                            (step === 2 && !formData.budget) ||
+                            (step === 3 && !formData.culture)
                         }
-                        className="text-lg font-bold px-8"
+                        className="text-lg font-bold px-8 cursor-pointer"
                     >
                         Suivant <ArrowRight className="ml-2 w-5 h-5" />
                     </Button>
@@ -189,7 +230,7 @@ export default function OnboardingForm() {
                     <Button
                         onClick={handleSubmit}
                         disabled={!formData.weight || !formData.height || !formData.age_range || loading}
-                        className="text-lg font-bold px-8 bg-primary text-black hover:bg-primary/90"
+                        className="text-lg font-bold px-8 bg-primary text-black hover:bg-primary/90 cursor-pointer"
                     >
                         {loading ? "Génération en cours..." : "Valider mon profil"} <Check className="ml-2 w-5 h-5" />
                     </Button>
