@@ -18,10 +18,6 @@ type Recipe = {
     carbs: number;
     fat: number;
 };
-type FavoriteRow = {
-    recipe: Recipe | null;
-};
-
 export default async function FavoritesPage() {
     const supabase = await createClient();
     const {
@@ -32,13 +28,17 @@ export default async function FavoritesPage() {
 
     const { data: favoritesData } = await supabase
         .from("favorites")
-        .select("recipe:recipes(*)")
+        .select("recipe_id, recipes(*)")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
 
-    const favorites = (favoritesData || []) as FavoriteRow[];
-    const recipes = favorites
-        .map((item) => item.recipe)
+    type FavoriteRow = {
+        recipe_id: string;
+        recipes: Recipe | null;
+    };
+
+    const recipes = ((favoritesData || []) as unknown as FavoriteRow[])
+        .map((item) => item.recipes)
         .filter(Boolean) as Recipe[];
 
     return (
