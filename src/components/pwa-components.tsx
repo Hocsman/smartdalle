@@ -5,7 +5,7 @@ import { Wifi, WifiOff } from "lucide-react";
 
 export function ServiceWorkerRegistration() {
     useEffect(() => {
-        if ("serviceWorker" in navigator && process.env.NODE_ENV === "production") {
+        if (typeof window !== "undefined" && "serviceWorker" in navigator && process.env.NODE_ENV === "production") {
             navigator.serviceWorker
                 .register("/sw.js")
                 .then((registration) => {
@@ -23,10 +23,16 @@ export function ServiceWorkerRegistration() {
 export function OnlineIndicator() {
     const [isOnline, setIsOnline] = useState(true);
     const [showIndicator, setShowIndicator] = useState(false);
+    const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
-        // Set initial state
-        setIsOnline(navigator.onLine);
+        // Mark as mounted (client-side only)
+        setMounted(true);
+
+        // Set initial state only on client
+        if (typeof window !== "undefined") {
+            setIsOnline(navigator.onLine);
+        }
 
         const handleOnline = () => {
             setIsOnline(true);
@@ -49,14 +55,14 @@ export function OnlineIndicator() {
         };
     }, []);
 
-    // Don't show if online and indicator should be hidden
-    if (isOnline && !showIndicator) return null;
+    // Don't render anything on server or if online and indicator should be hidden
+    if (!mounted || (isOnline && !showIndicator)) return null;
 
     return (
         <div
             className={`fixed bottom-20 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-full flex items-center gap-2 text-sm font-bold shadow-lg transition-all duration-300 ${isOnline
-                    ? "bg-green-500 text-white"
-                    : "bg-orange-500 text-white animate-pulse"
+                ? "bg-green-500 text-white"
+                : "bg-orange-500 text-white animate-pulse"
                 }`}
         >
             {isOnline ? (

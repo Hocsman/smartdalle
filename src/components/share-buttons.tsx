@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Share2, Twitter, MessageCircle, Link2, Check } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface ShareButtonsProps {
     title: string;
@@ -11,8 +11,20 @@ interface ShareButtonsProps {
 
 export function ShareButtons({ title, url }: ShareButtonsProps) {
     const [copied, setCopied] = useState(false);
-    const shareUrl = url || (typeof window !== "undefined" ? window.location.href : "");
+    const [canShare, setCanShare] = useState(false);
+    const [shareUrl, setShareUrl] = useState(url || "");
     const shareText = `🔥 ${title} - Check out this recipe on SmartDalle!`;
+
+    useEffect(() => {
+        // Set URL on client side
+        if (!url && typeof window !== "undefined") {
+            setShareUrl(window.location.href);
+        }
+        // Check if native share is available
+        if (typeof navigator !== "undefined" && "share" in navigator) {
+            setCanShare(true);
+        }
+    }, [url]);
 
     const handleCopy = async () => {
         try {
@@ -25,7 +37,7 @@ export function ShareButtons({ title, url }: ShareButtonsProps) {
     };
 
     const handleNativeShare = async () => {
-        if (navigator.share) {
+        if (typeof navigator !== "undefined" && navigator.share) {
             try {
                 await navigator.share({
                     title: title,
@@ -52,7 +64,7 @@ export function ShareButtons({ title, url }: ShareButtonsProps) {
     return (
         <div className="flex flex-wrap gap-2">
             {/* Native Share (Mobile) */}
-            {"share" in navigator && (
+            {canShare && (
                 <Button
                     variant="outline"
                     size="sm"
