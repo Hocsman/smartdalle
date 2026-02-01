@@ -2,6 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Wallet } from "lucide-react";
 import Link from "next/link";
+import { FavoriteButton } from "@/components/favorite-button";
 
 interface Recipe {
     id: string;
@@ -17,9 +18,10 @@ interface Recipe {
 
 interface RecipeCardProps {
     recipe: Recipe;
+    isFavorite?: boolean;
 }
 
-export function RecipeCard({ recipe }: RecipeCardProps) {
+export function RecipeCard({ recipe, isFavorite = false }: RecipeCardProps) {
     return (
         <Link href={`/recipes/${recipe.id}`} className="block h-full cursor-pointer group">
             <Card className="h-full overflow-hidden border-input bg-card shadow-md transition-all duration-300 hover:shadow-xl hover:scale-[1.02] hover:border-primary/50">
@@ -35,10 +37,13 @@ export function RecipeCard({ recipe }: RecipeCardProps) {
                             No Image
                         </div>
                     )}
-                    <div className="absolute top-2 right-2">
+
+                    {/* Top bar with culture badge and favorite button */}
+                    <div className="absolute top-2 left-2 right-2 flex justify-between items-start">
                         <Badge variant="secondary" className="font-bold shadow-sm backdrop-blur-md bg-black/50 text-white border-none">
                             {recipe.culture}
                         </Badge>
+                        <FavoriteButton recipeId={recipe.id} initialFavorite={isFavorite} size="sm" />
                     </div>
                 </div>
 

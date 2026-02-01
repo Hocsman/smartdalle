@@ -1,13 +1,14 @@
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
-import { RecipeCard } from "@/components/recipe-card";
 import { Button } from "@/components/ui/button";
 import { generatePlan } from "./actions";
 import { DailyPlanView } from "@/components/daily-plan-view";
-import { Sparkles, Crown } from "lucide-react";
+import { Sparkles, Crown, History } from "lucide-react";
 import Link from "next/link";
-import { StaggerGrid, MotionItem } from "@/components/ui/motion-wrapper";
 import { AiGeneratorButton } from "@/components/ai-generator-button";
+import { DashboardRecipesClient } from "@/components/dashboard-recipes-client";
+import { getFavoriteIds } from "@/app/actions/favorites";
+import { NotificationButton } from "@/components/notification-settings";
 
 export const dynamic = "force-dynamic";
 
@@ -63,8 +64,11 @@ export default async function DashboardPage() {
         }
     }
 
-    // Fetch Suggestions (Fallback / "A la une")
-    const { data: recipes } = await supabase.from("recipes").select("*").limit(6);
+    // Fetch ALL Recipes for browsing
+    const { data: recipes } = await supabase.from("recipes").select("*").order("created_at", { ascending: false });
+
+    // Fetch User's Favorites
+    const favoriteIds = await getFavoriteIds();
 
     return (
         <div className="min-h-screen gradient-bg p-6 md:p-10 mb-20 relative overflow-hidden">
@@ -91,8 +95,15 @@ export default async function DashboardPage() {
                                 </p>
                             </div>
 
-                            {/* Gamification Streak & Progress Link */}
-                            <div className="flex gap-4">
+                            {/* Gamification Streak & History Link */}
+                            <div className="flex gap-3">
+                                <NotificationButton />
+                                <Link href="/history">
+                                    <div className="flex flex-col items-center bg-card border border-input p-2 rounded-lg cursor-pointer hover:border-primary transition-colors">
+                                        <History className="h-5 w-5 text-primary" />
+                                        <span className="text-[10px] uppercase font-bold text-muted-foreground">Historique</span>
+                                    </div>
+                                </Link>
                                 <Link href="/progress">
                                     <div className="flex flex-col items-center bg-card border border-input p-2 rounded-lg cursor-pointer hover:border-primary transition-colors">
                                         <div className="flex items-center gap-1 text-orange-500 font-black text-xl">
@@ -136,28 +147,26 @@ export default async function DashboardPage() {
                         </div>
                         <DailyPlanView plan={dailyPlan} recipes={plannedRecipes} />
                     </section>
-                ) : (
-                    <section>
-                        <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
-                            <span className="w-2 h-8 bg-primary rounded-sm inline-block"></span>
-                            À la une
-                        </h2>
+                ) : null}
 
-                        {recipes && recipes.length > 0 ? (
-                            <StaggerGrid className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {recipes.map((recipe) => (
-                                    <MotionItem key={recipe.id}>
-                                        <RecipeCard recipe={recipe} />
-                                    </MotionItem>
-                                ))}
-                            </StaggerGrid>
-                        ) : (
-                            <div className="text-center py-20 bg-card/20 rounded-xl border border-dashed border-input">
-                                <p className="text-muted-foreground">Aucune recette trouvée. (As-tu lancé le script de seed ?)</p>
-                            </div>
-                        )}
-                    </section>
-                )}
+                {/* Recipe Discovery Section */}
+                <section>
+                    <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
+                        <span className="w-2 h-8 bg-primary rounded-sm inline-block"></span>
+                        {dailyPlan ? "Découvrir d'autres recettes" : "À la une"}
+                    </h2>
+
+                    {recipes && recipes.length > 0 ? (
+                        <DashboardRecipesClient
+                            recipes={recipes}
+                            favoriteIds={favoriteIds}
+                        />
+                    ) : (
+                        <div className="text-center py-20 bg-card/20 rounded-xl border border-dashed border-input">
+                            <p className="text-muted-foreground">Aucune recette trouvée. (As-tu lancé le script de seed ?)</p>
+                        </div>
+                    )}
+                </section>
 
             </div>
         </div>
