@@ -115,7 +115,7 @@ export default function OnboardingForm() {
                     <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
                         <h2 className="text-3xl font-bold text-white text-center">Ta Culture Culinaire ?</h2>
                         <p className="text-muted-foreground text-center">On adapte les recettes à tes goûts</p>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                             <SelectionCard
                                 label="Africaine"
                                 icon={<Globe className="w-8 h-8" />}
@@ -127,6 +127,18 @@ export default function OnboardingForm() {
                                 icon={<Palmtree className="w-8 h-8" />}
                                 selected={formData.culture === "antillaise"}
                                 onClick={() => handleSelection("culture", "antillaise")}
+                            />
+                            <SelectionCard
+                                label="Maghrébine"
+                                icon={<Globe className="w-8 h-8" />}
+                                selected={formData.culture === "maghrebine"}
+                                onClick={() => handleSelection("culture", "maghrebine")}
+                            />
+                            <SelectionCard
+                                label="Française"
+                                icon={<ChefHat className="w-8 h-8" />}
+                                selected={formData.culture === "francaise"}
+                                onClick={() => handleSelection("culture", "francaise")}
                             />
                             <SelectionCard
                                 label="Classique"
