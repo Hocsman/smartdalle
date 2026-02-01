@@ -81,13 +81,13 @@ export default async function DashboardPage() {
                                     Smart<span className="text-primary">Dalle</span>
                                 </h1>
                                 <p className="text-muted-foreground mt-2 text-lg flex items-center gap-2">
-                                    Yo <span className="text-white font-bold capitalize">{pseudo}</span>
+                                    Wesh <span className="text-white font-bold capitalize">{pseudo}</span>
                                     {isPremium && (
                                         <span className="inline-flex items-center gap-1 bg-gradient-to-r from-yellow-500 to-amber-600 text-black text-xs font-black px-2 py-0.5 rounded-full">
                                             <Crown className="w-3 h-3" /> PRO
                                         </span>
                                     )}
-                                    , prêt à manger propre ?
+                                    , voici ton fuel pour aujourd&apos;hui 🔥
                                 </p>
                             </div>
 
