@@ -59,6 +59,10 @@ export async function generateRecipe(): Promise<GeneratedRecipe> {
 
     const systemPrompt = `Tu es un chef street-food expert en nutrition sportive. Génère une recette pour un profil ${objectif} avec un budget ${budget}.
 Format de réponse : JSON strict avec ces clés EXACTES (name, ingredients, instructions, macros, prix_estime, emoji).
+Règles:
+- macros doit être un objet avec protein, carbs, fat, calories EN NOMBRES (sans "g" ni "kcal").
+- prix_estime doit être un nombre (ex: 6.5).
+- instructions doit être aérée, idéalement sous forme d'étapes numérotées.
 Ton : Motivant, tutoiement, style urbain.`;
 
     const openai = getOpenAIClient();

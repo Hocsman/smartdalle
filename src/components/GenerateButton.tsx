@@ -25,6 +25,30 @@ export function GenerateButton() {
         }
     };
 
+    const formatSteps = (text: string) => {
+        const normalized = text.replace(/\r\n/g, "\n").trim();
+        if (!normalized) return [];
+
+        if (/\n\d+[\).\s]/.test(normalized)) {
+            return normalized
+                .split(/\n\d+[\).\s]+/)
+                .map((step) => step.trim())
+                .filter(Boolean);
+        }
+
+        if (/\d+[\).\s]/.test(normalized)) {
+            return normalized
+                .split(/\d+[\).\s]+/)
+                .map((step) => step.trim())
+                .filter(Boolean);
+        }
+
+        return normalized
+            .split(".")
+            .map((step) => step.trim())
+            .filter(Boolean);
+    };
+
     return (
         <div className="space-y-4">
             <Button
@@ -54,19 +78,27 @@ export function GenerateButton() {
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                         <div className="bg-black/30 rounded-lg p-3">
                             <p className="text-xs text-muted-foreground uppercase">Protéines</p>
-                            <p className="text-xl font-black text-primary">{recipe.macros.protein}g</p>
+                            <p className="text-xl font-black text-primary">
+                                {recipe.macros.protein ? `${recipe.macros.protein}g` : "—"}
+                            </p>
                         </div>
                         <div className="bg-black/30 rounded-lg p-3">
                             <p className="text-xs text-muted-foreground uppercase">Glucides</p>
-                            <p className="text-lg font-bold text-white">{recipe.macros.carbs}g</p>
+                            <p className="text-lg font-bold text-white">
+                                {recipe.macros.carbs ? `${recipe.macros.carbs}g` : "—"}
+                            </p>
                         </div>
                         <div className="bg-black/30 rounded-lg p-3">
                             <p className="text-xs text-muted-foreground uppercase">Lipides</p>
-                            <p className="text-lg font-bold text-white">{recipe.macros.fat}g</p>
+                            <p className="text-lg font-bold text-white">
+                                {recipe.macros.fat ? `${recipe.macros.fat}g` : "—"}
+                            </p>
                         </div>
                         <div className="bg-black/30 rounded-lg p-3">
                             <p className="text-xs text-muted-foreground uppercase">Calories</p>
-                            <p className="text-lg font-bold text-white">{recipe.macros.calories} kcal</p>
+                            <p className="text-lg font-bold text-white">
+                                {recipe.macros.calories ? `${recipe.macros.calories} kcal` : "—"}
+                            </p>
                         </div>
                     </div>
 
@@ -81,9 +113,17 @@ export function GenerateButton() {
 
                     <div className="space-y-2">
                         <p className="text-sm font-bold text-white">Instructions</p>
-                        <p className="text-sm text-muted-foreground whitespace-pre-line">
-                            {recipe.instructions}
-                        </p>
+                        {formatSteps(recipe.instructions).length > 1 ? (
+                            <ol className="list-decimal list-inside text-sm text-muted-foreground space-y-2">
+                                {formatSteps(recipe.instructions).map((step, index) => (
+                                    <li key={`${step}-${index}`}>{step}</li>
+                                ))}
+                            </ol>
+                        ) : (
+                            <p className="text-sm text-muted-foreground whitespace-pre-line">
+                                {recipe.instructions}
+                            </p>
+                        )}
                     </div>
                 </div>
             )}
