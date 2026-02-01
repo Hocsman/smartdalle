@@ -39,9 +39,12 @@ export default async function RecipePage({ params }: RecipePageProps) {
     }
 
     return (
-        <div className="min-h-screen bg-background pb-20">
+        <div className="min-h-screen gradient-bg pb-20 relative overflow-hidden">
+            {/* Subtle Background Grid */}
+            <div className="absolute inset-0 bg-[linear-gradient(rgba(255,211,0,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,211,0,0.02)_1px,transparent_1px)] bg-[size:50px_50px] pointer-events-none" />
+
             {/* Hero Image */}
-            <div className="relative h-[40vh] w-full overflow-hidden">
+            <div className="relative h-[40vh] w-full overflow-hidden z-10">
                 {recipe.image_url ? (
                     <img
                         src={recipe.image_url}
