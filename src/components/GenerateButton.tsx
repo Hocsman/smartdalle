@@ -3,21 +3,40 @@
 import { useState } from "react";
 import { generateRecipe, type GeneratedRecipe } from "@/app/actions/generate-recipe";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
+import { Lock } from "lucide-react";
 
 type Status = "idle" | "loading" | "error" | "success";
 
-export function GenerateButton() {
+interface GenerateButtonProps {
+    isPremium?: boolean;
+}
+
+export function GenerateButton({ isPremium = false }: GenerateButtonProps) {
     const [status, setStatus] = useState<Status>("idle");
     const [recipe, setRecipe] = useState<GeneratedRecipe | null>(null);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const router = useRouter();
 
     const handleGenerate = async () => {
+        if (!isPremium) {
+            router.push("/premium");
+            return;
+        }
         setStatus("loading");
         setErrorMessage(null);
         try {
             const result = await generateRecipe();
-            setRecipe(result);
-            setStatus("success");
+            if ("error" in result && result.error === "premium_required") {
+                router.push("/premium");
+                return;
+            }
+            if ("recipe" in result) {
+                setRecipe(result.recipe);
+                setStatus("success");
+                return;
+            }
+            throw new Error("Unexpected response");
         } catch (error) {
             console.error(error);
             setStatus("error");
@@ -56,7 +75,15 @@ export function GenerateButton() {
                 disabled={status === "loading"}
                 className="bg-[#FFD300] text-black hover:bg-[#FFD300]/90 font-extrabold text-base px-6 py-5 rounded-xl shadow-sm shadow-yellow-400/30"
             >
-                {status === "loading" ? "Le chef réfléchit... 🍳" : "Générer un repas Fresh ✨"}
+                {status === "loading" ? (
+                    "Le chef réfléchit... 🍳"
+                ) : isPremium ? (
+                    "Générer un repas Fresh ✨"
+                ) : (
+                    <span className="flex items-center gap-2">
+                        <Lock className="h-4 w-4" /> Générer un repas Fresh
+                    </span>
+                )}
             </Button>
 
             {status === "error" && (

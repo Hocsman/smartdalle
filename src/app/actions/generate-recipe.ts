@@ -18,6 +18,10 @@ export type GeneratedRecipe = {
     emoji: string;
 };
 
+export type GenerateRecipeResult =
+    | { error: "premium_required" }
+    | { recipe: GeneratedRecipe };
+
 type AiResponse = {
     name?: string;
     nom?: string;
@@ -29,11 +33,12 @@ type AiResponse = {
         fat: number;
         calories: number;
     };
-    prix_estime: number;
+    prix_estime?: number | string;
+    price_estimated?: number | string;
     emoji: string;
 };
 
-export async function generateRecipe(): Promise<GeneratedRecipe> {
+export async function generateRecipe(): Promise<GenerateRecipeResult> {
     const supabase = await createClient();
     const {
         data: { user },
@@ -45,9 +50,13 @@ export async function generateRecipe(): Promise<GeneratedRecipe> {
 
     const { data: profile } = await supabase
         .from("profiles")
-        .select("budget_level, objectif")
+        .select("budget_level, objectif, is_premium")
         .eq("id", user.id)
         .single();
+
+    if (!profile?.is_premium) {
+        return { error: "premium_required" };
+    }
 
     const budget =
         profile?.budget_level === "eco"
@@ -57,12 +66,13 @@ export async function generateRecipe(): Promise<GeneratedRecipe> {
                 : "standard";
     const objectif = profile?.objectif || "maintien";
 
-    const systemPrompt = `Tu es un chef street-food expert en nutrition sportive. Génère une recette pour un profil ${objectif} avec un budget ${budget}.
-Format de réponse : JSON strict avec ces clés EXACTES (name, ingredients, instructions, macros, prix_estime, emoji).
-Règles:
-- macros doit être un objet avec protein, carbs, fat, calories EN NOMBRES (sans "g" ni "kcal").
-- prix_estime doit être un nombre (ex: 6.5).
-- instructions doit être aérée, idéalement sous forme d'étapes numérotées.
+    const systemPrompt = `Tu es un chef expert en nutrition à petit budget.
+Règles DATA strictes :
+1. PRIX : Base tes estimations sur les prix moyens en France (ex: Poulet ~10€/kg, Riz ~2€/kg, Oeuf ~0.30€/u). Si le budget user est 'ECO', interdiction d'utiliser des ingrédients de luxe (Saumon, Avocat, Bœuf noble).
+2. MACROS : Sois précis sur les protéines. Priorise les sources économiques (Oeufs, Thon, Lentilles, Dinde).
+3. FORMAT : Retourne un JSON strict (nom, ingredients, instructions, macros, price_estimated, emoji).
+Contrainte profil : objectif ${objectif}, budget ${budget}.
+Le JSON doit être strict. Les champs macros et price_estimated doivent être des nombres (sans "g" ni "kcal").
 Ton : Motivant, tutoiement, style urbain.`;
 
     const openai = getOpenAIClient();
@@ -116,7 +126,7 @@ Ton : Motivant, tutoiement, style urbain.`;
         calories: toNumber(parsed.macros?.calories),
     };
 
-    const prixEstime = toNumber(parsed.prix_estime);
+    const prixEstime = toNumber(parsed.price_estimated ?? parsed.prix_estime);
 
     const { data: insertedRecipe, error } = await supabase
         .from("recipes")
@@ -141,12 +151,14 @@ Ton : Motivant, tutoiement, style urbain.`;
     }
 
     return {
-        id: insertedRecipe.id,
-        name,
-        ingredients,
-        instructions: parsed.instructions,
-        macros,
-        prix_estime: prixEstime,
-        emoji: parsed.emoji || "🍽️",
+        recipe: {
+            id: insertedRecipe.id,
+            name,
+            ingredients,
+            instructions: parsed.instructions,
+            macros,
+            prix_estime: prixEstime,
+            emoji: parsed.emoji || "🍽️",
+        },
     };
 }

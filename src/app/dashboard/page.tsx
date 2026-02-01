@@ -157,7 +157,7 @@ export default async function DashboardPage() {
                         <span className="w-2 h-8 bg-yellow-400 rounded-sm inline-block"></span>
                         <h2 className="text-2xl font-bold text-white">Recette IA du Jour</h2>
                     </div>
-                    <GenerateButton />
+                    <GenerateButton isPremium={isPremium} />
                 </section>
 
                 {dailyPlan && plannedRecipes ? (
