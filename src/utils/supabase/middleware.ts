@@ -8,53 +8,62 @@ export async function updateSession(request: NextRequest) {
         },
     });
 
-    const supabase = createServerClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        {
-            cookies: {
-                getAll() {
-                    return request.cookies.getAll();
-                },
-                setAll(cookiesToSet) {
-                    cookiesToSet.forEach(({ name, value, options }) => {
-                        request.cookies.set(name, value);
-                    });
-                    response = NextResponse.next({
-                        request: {
-                            headers: request.headers,
-                        },
-                    });
-                    cookiesToSet.forEach(({ name, value, options }) => {
-                        response.cookies.set(name, value, options);
-                    });
-                },
-            },
-        }
-    );
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-    // IMPORTANT: Avoid writing any logic between createServerClient and
-    // supabase.auth.getUser(). A simple mistake could make it very hard to debug
-    // issues with users being randomly logged out.
-
-    const {
-        data: { user },
-    } = await supabase.auth.getUser();
-
-    if (
-        !user &&
-        !request.nextUrl.pathname.startsWith("/login") &&
-        !request.nextUrl.pathname.startsWith("/auth") &&
-        request.nextUrl.pathname !== "/"
-    ) {
-        // no user, potentially respond by redirecting the user to the login page
-        const url = request.nextUrl.clone();
-        url.pathname = "/login";
-        return NextResponse.redirect(url);
+    if (!supabaseUrl || !supabaseKey) {
+        console.warn("Supabase Env Vars missing in Middleware. Skipping auth check.");
+        return response;
     }
 
-    // If user is logged in and tries to access login or home, redirect to dashboard?
-    // Keeping it simple for now, just protecting internal routes.
+    try {
+        const supabase = createServerClient(
+            supabaseUrl,
+            supabaseKey,
+            {
+                cookies: {
+                    getAll() {
+                        return request.cookies.getAll();
+                    },
+                    setAll(cookiesToSet) {
+                        cookiesToSet.forEach(({ name, value, options }) => {
+                            request.cookies.set(name, value);
+                        });
+                        response = NextResponse.next({
+                            request: {
+                                headers: request.headers,
+                            },
+                        });
+                        cookiesToSet.forEach(({ name, value, options }) => {
+                            response.cookies.set(name, value, options);
+                        });
+                    },
+                },
+            }
+        );
+
+        // IMPORTANT: Avoid writing any logic between createServerClient and
+        // supabase.auth.getUser().
+        const {
+            data: { user },
+        } = await supabase.auth.getUser();
+
+        if (
+            !user &&
+            !request.nextUrl.pathname.startsWith("/login") &&
+            !request.nextUrl.pathname.startsWith("/auth") &&
+            request.nextUrl.pathname !== "/"
+        ) {
+            const url = request.nextUrl.clone();
+            url.pathname = "/login";
+            return NextResponse.redirect(url);
+        }
+    } catch (e) {
+        console.error("Middleware Error:", e);
+        // On error, we allow the request to proceed (or could redirect to error page)
+        // For MVP, safer to proceed than block everything with 500
+        return response;
+    }
 
     return response;
 }
