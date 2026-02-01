@@ -4,7 +4,7 @@ import { RecipeCard } from "@/components/recipe-card";
 import { Button } from "@/components/ui/button";
 import { generatePlan } from "./actions";
 import { DailyPlanView } from "@/components/daily-plan-view";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Crown } from "lucide-react";
 import Link from "next/link";
 import { StaggerGrid, MotionItem } from "@/components/ui/motion-wrapper";
 import { AiGeneratorButton } from "@/components/ai-generator-button";
@@ -28,6 +28,7 @@ export default async function DashboardPage() {
         .single();
 
     const pseudo = profile?.username || user.email?.split("@")[0] || "Street Chef";
+    const isPremium = profile?.is_premium === true;
 
     // Check for User's Plan for TODAY
     const today = new Date().toISOString().split("T")[0];
@@ -76,8 +77,14 @@ export default async function DashboardPage() {
                                 <h1 className="text-3xl md:text-5xl font-extrabold text-white tracking-tight uppercase italic">
                                     Smart<span className="text-primary">Dalle</span>
                                 </h1>
-                                <p className="text-muted-foreground mt-2 text-lg">
-                                    Yo <span className="text-white font-bold capitalize">{pseudo}</span>, prêt à manger propre ?
+                                <p className="text-muted-foreground mt-2 text-lg flex items-center gap-2">
+                                    Yo <span className="text-white font-bold capitalize">{pseudo}</span>
+                                    {isPremium && (
+                                        <span className="inline-flex items-center gap-1 bg-gradient-to-r from-yellow-500 to-amber-600 text-black text-xs font-black px-2 py-0.5 rounded-full">
+                                            <Crown className="w-3 h-3" /> PRO
+                                        </span>
+                                    )}
+                                    , prêt à manger propre ?
                                 </p>
                             </div>
 
@@ -108,12 +115,12 @@ export default async function DashboardPage() {
                                     <Sparkles className="mr-2 h-5 w-5" /> Générer mon Menu
                                 </Button>
                             </form>
-                            <AiGeneratorButton />
+                            <AiGeneratorButton isPremium={isPremium} />
                         </div>
                     )}
                     {dailyPlan && (
                         <div className="mt-4 md:mt-0">
-                            <AiGeneratorButton />
+                            <AiGeneratorButton isPremium={isPremium} />
                         </div>
                     )}
                 </header>

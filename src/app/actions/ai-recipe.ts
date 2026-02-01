@@ -18,12 +18,17 @@ export async function generateAiRecipe() {
 
     if (!user) throw new Error("Unauthorized");
 
-    // Fetch User Preferences
+    // Fetch User Preferences AND Premium Status
     const { data: profile } = await supabase
         .from("profiles")
-        .select("budget_level, objective")
+        .select("budget_level, objective, is_premium")
         .eq("id", user.id)
         .single();
+
+    // Premium Guard
+    if (!profile?.is_premium) {
+        throw new Error("PREMIUM_REQUIRED");
+    }
 
     const budgetState = profile?.budget_level === 'eco' ? 'très économique (moins de 3 euros)' : 'standard';
     const objectiveState = profile?.objective || 'santé';
