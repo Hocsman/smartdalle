@@ -1,15 +1,10 @@
 "use server";
 
 import { createClient } from "@/utils/supabase/server";
-import { OpenAI } from "openai";
+import { getOpenAIClient } from "@/lib/openai";
 
 export async function generateAiRecipe() {
-    // Initialize OpenAI lazily to prevent crashes on missing API key
-    const apiKey = process.env.OPENAI_API_KEY;
-    if (!apiKey) {
-        throw new Error("OPENAI_API_KEY is not configured");
-    }
-    const openai = new OpenAI({ apiKey });
+    const openai = getOpenAIClient();
 
     const supabase = await createClient();
     const {

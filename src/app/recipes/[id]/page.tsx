@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
 import { ArrowLeft, Utensils } from "lucide-react";
 import { RecipeClientSection } from "./recipe-client-section";
+import { AiGeneratorButton } from "@/components/ai-generator-button";
 
 interface RecipePageProps {
     params: Promise<{
@@ -18,6 +19,14 @@ export const dynamic = "force-dynamic";
 export default async function RecipePage({ params }: RecipePageProps) {
     const { id } = await params;
     const supabase = await createClient();
+
+    // Check Premium Status
+    const { data: { user } } = await supabase.auth.getUser();
+    let isPremium = false;
+    if (user) {
+        const { data: profile } = await supabase.from("profiles").select("is_premium").eq("id", user.id).single();
+        isPremium = profile?.is_premium || false;
+    }
 
     const { data: recipe } = await supabase
         .from("recipes")
@@ -50,12 +59,12 @@ export default async function RecipePage({ params }: RecipePageProps) {
             <div className="absolute inset-0 bg-[linear-gradient(rgba(255,211,0,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,211,0,0.02)_1px,transparent_1px)] bg-[size:50px_50px] pointer-events-none" />
 
             {/* Hero Image */}
-            <div className="relative h-[40vh] w-full overflow-hidden z-10">
+            <div className="relative h-[40vh] w-full overflow-hidden z-10 group">
                 {recipe.image_url ? (
                     <img
                         src={recipe.image_url}
                         alt={recipe.name}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                     />
                 ) : (
                     <div className="w-full h-full bg-secondary flex items-center justify-center">
@@ -64,11 +73,20 @@ export default async function RecipePage({ params }: RecipePageProps) {
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
 
-                <Link href="/dashboard" className="absolute top-6 left-6">
+                <Link href="/dashboard" className="absolute top-6 left-6 z-20">
                     <Button size="icon" variant="secondary" className="rounded-full shadow-lg cursor-pointer">
                         <ArrowLeft className="h-5 w-5" />
                     </Button>
                 </Link>
+
+                {/* AI Generator Button (Top Right) */}
+                <div className="absolute top-6 right-6 z-20">
+                    <AiGeneratorButton
+                        recipeId={recipe.id}
+                        recipeName={recipe.name}
+                        isPremium={isPremium}
+                    />
+                </div>
             </div>
 
             <div className="max-w-5xl mx-auto px-6 -mt-24 relative z-10">

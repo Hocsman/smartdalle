@@ -1,68 +1,69 @@
 "use client";
 
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Bot, Loader2, Lock } from "lucide-react";
-import { generateAiRecipe } from "@/app/actions/ai-recipe";
+import { Sparkles, Loader2, Lock } from "lucide-react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 interface AiGeneratorButtonProps {
-    isPremium?: boolean;
+    recipeId?: string; // Optional if we just generate for fun, but usually attached to recipe
+    recipeName?: string;
+    isPremium: boolean;
+    onImageGenerated?: (url: string) => void;
 }
 
-export function AiGeneratorButton({ isPremium = false }: AiGeneratorButtonProps) {
-    const [loading, setLoading] = useState(false);
+export function AiGeneratorButton({ recipeId, recipeName, isPremium, onImageGenerated }: AiGeneratorButtonProps) {
+    const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
 
-    const handleClick = async () => {
-        // If not premium, redirect to pricing page
+    const handleGenerate = async () => {
         if (!isPremium) {
             router.push("/premium");
             return;
         }
 
-        // Premium user: generate recipe
-        setLoading(true);
+        if (!recipeName) return;
+
+        setIsLoading(true);
         try {
-            const recipeId = await generateAiRecipe();
-            router.push(`/recipes/${recipeId}`);
-        } catch (e: any) {
-            console.error(e);
-            if (e.message === "PREMIUM_REQUIRED") {
-                router.push("/premium");
-            } else {
-                alert("Erreur: Le Chef n'a pas pu créer la recette.");
-            }
-            setLoading(false);
+            const res = await fetch("/api/generate-image", {
+                method: "POST",
+                body: JSON.stringify({ recipeName, recipeId }),
+            });
+
+            if (!res.ok) throw new Error("Generation failed");
+
+            const data = await res.json();
+            if (onImageGenerated) onImageGenerated(data.url);
+
+            router.refresh(); // Refresh to show new image if server rendered
+        } catch (error) {
+            console.error(error);
+            alert("Erreur lors de la génération. Vérifie ta connexion ou réessaie plus tard.");
+        } finally {
+            setIsLoading(false);
         }
     };
 
     return (
         <Button
-            onClick={handleClick}
-            disabled={loading}
-            variant="secondary"
-            className={`w-full sm:w-auto font-bold border cursor-pointer ${isPremium
-                    ? "bg-zinc-800 text-white hover:bg-zinc-700 border-zinc-700"
-                    : "bg-zinc-900 text-muted-foreground hover:bg-zinc-800 border-zinc-800"
-                }`}
+            onClick={handleGenerate}
+            disabled={isLoading}
+            variant={isPremium ? "default" : "secondary"}
+            className={`
+                font-bold shadow-lg transition-all 
+                ${isPremium ? "bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white" : "cursor-pointer"}
+            `}
+            size="sm"
         >
-            {loading ? (
-                <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Le Chef réfléchit...
-                </>
+            {isLoading ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : isPremium ? (
-                <>
-                    <Bot className="mr-2 h-4 w-4 text-primary" />
-                    Générer une recette IA ✨
-                </>
+                <Sparkles className="mr-2 h-4 w-4 text-yellow-300" />
             ) : (
-                <>
-                    <Lock className="mr-2 h-4 w-4 text-primary" />
-                    Générer une recette IA 🔒
-                </>
+                <Lock className="mr-2 h-4 w-4" />
             )}
+            {isLoading ? "Magie en cours..." : "Générer Photo IA"}
         </Button>
     );
 }

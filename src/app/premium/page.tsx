@@ -1,127 +1,113 @@
-import { createClient } from "@/utils/supabase/server";
-import { redirect } from "next/navigation";
+"use client";
+
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Check, X, Sparkles, Crown, ArrowLeft } from "lucide-react";
-import Link from "next/link";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Check, Crown, Loader2, Sparkles, X } from "lucide-react";
+import { useState } from "react";
+import { createCheckoutSession } from "./actions";
 
-export const dynamic = "force-dynamic";
+export default function PremiumPage() {
+    const [isLoading, setIsLoading] = useState(false);
 
-const features = [
-    { name: "Accès aux recettes de base", free: true, pro: true },
-    { name: "Suivi de poids", free: true, pro: true },
-    { name: "Menu du jour", free: true, pro: true },
-    { name: "Générateur IA Illimité", free: false, pro: true },
-    { name: "Liste de courses auto", free: false, pro: true },
-    { name: "Recettes personnalisées", free: false, pro: true },
-    { name: "Support Prioritaire", free: false, pro: true },
-];
+    const handleUpgrade = async () => {
+        setIsLoading(true);
+        try {
+            // Call server action to create session
+            const { url } = await createCheckoutSession();
 
-export default async function PremiumPage() {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user) return redirect("/login");
-
-    const { data: profile } = await supabase
-        .from("profiles")
-        .select("is_premium")
-        .eq("id", user.id)
-        .single();
-
-    const isPremium = profile?.is_premium === true;
+            if (url) {
+                window.location.href = url;
+            } else {
+                console.error("No checkout URL returned");
+            }
+        } catch (error) {
+            console.error("Upgrade failed:", error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     return (
-        <div className="min-h-screen gradient-bg p-6 md:p-10 relative overflow-hidden">
-            {/* Subtle Background Grid */}
-            <div className="absolute inset-0 bg-[linear-gradient(rgba(255,211,0,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,211,0,0.02)_1px,transparent_1px)] bg-[size:50px_50px] pointer-events-none" />
+        <div className="min-h-screen gradient-bg p-6 md:p-10 flex flex-col items-center justify-center">
 
-            <div className="max-w-5xl mx-auto relative z-10">
-                {/* Back Button */}
-                <Link href="/dashboard" className="inline-flex items-center text-muted-foreground hover:text-white mb-8">
-                    <ArrowLeft className="w-4 h-4 mr-2" /> Retour au Dashboard
-                </Link>
-
-                {/* Header */}
-                <div className="text-center mb-12">
-                    <Badge className="bg-primary text-black font-bold mb-4">
-                        <Crown className="w-3 h-3 mr-1" /> OFFRE PREMIUM
-                    </Badge>
-                    <h1 className="text-4xl md:text-5xl font-extrabold text-white uppercase italic mb-4">
-                        Passe au niveau <span className="text-primary">Supérieur</span>
-                    </h1>
-                    <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                        Débloque le Chef IA et génère des recettes uniques adaptées à ton profil, sans limite.
-                    </p>
-                </div>
-
-                {/* Pricing Cards */}
-                <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-                    {/* Free Plan */}
-                    <Card className="bg-card border-input relative">
-                        <CardHeader className="text-center pb-2">
-                            <CardTitle className="text-2xl font-bold text-white">Gratuit</CardTitle>
-                            <div className="text-4xl font-extrabold text-white mt-4">0€<span className="text-lg font-normal text-muted-foreground">/mois</span></div>
-                        </CardHeader>
-                        <CardContent className="pt-6">
-                            <ul className="space-y-4">
-                                {features.map((feature) => (
-                                    <li key={feature.name} className="flex items-center gap-3">
-                                        {feature.free ? (
-                                            <Check className="w-5 h-5 text-green-400 shrink-0" />
-                                        ) : (
-                                            <X className="w-5 h-5 text-muted-foreground/50 shrink-0" />
-                                        )}
-                                        <span className={feature.free ? "text-white" : "text-muted-foreground/50"}>
-                                            {feature.name}
-                                        </span>
-                                    </li>
-                                ))}
-                            </ul>
-                            <Button variant="outline" className="w-full mt-8 border-input text-muted-foreground" disabled>
-                                Plan Actuel
-                            </Button>
-                        </CardContent>
-                    </Card>
-
-                    {/* Pro Plan */}
-                    <Card className="bg-gradient-to-b from-primary/20 to-card border-primary border-2 relative overflow-hidden">
-                        <div className="absolute top-0 right-0 bg-primary text-black text-xs font-bold px-3 py-1 rounded-bl-lg">
-                            POPULAIRE
-                        </div>
-                        <CardHeader className="text-center pb-2">
-                            <CardTitle className="text-2xl font-bold text-primary flex items-center justify-center gap-2">
-                                <Crown className="w-5 h-5" /> SmartDalle Pro
-                            </CardTitle>
-                            <div className="text-4xl font-extrabold text-white mt-4">4.99€<span className="text-lg font-normal text-muted-foreground">/mois</span></div>
-                        </CardHeader>
-                        <CardContent className="pt-6">
-                            <ul className="space-y-4">
-                                {features.map((feature) => (
-                                    <li key={feature.name} className="flex items-center gap-3">
-                                        <Check className="w-5 h-5 text-primary shrink-0" />
-                                        <span className="text-white">{feature.name}</span>
-                                    </li>
-                                ))}
-                            </ul>
-                            {isPremium ? (
-                                <Button className="w-full mt-8 bg-green-600 hover:bg-green-700 text-white font-bold" disabled>
-                                    <Check className="w-4 h-4 mr-2" /> Tu es déjà Pro !
-                                </Button>
-                            ) : (
-                                <Button className="w-full mt-8 bg-primary hover:bg-primary/90 text-black font-bold text-lg cursor-pointer">
-                                    <Sparkles className="w-4 h-4 mr-2" /> Passer Pro
-                                </Button>
-                            )}
-                        </CardContent>
-                    </Card>
-                </div>
-
-                {/* Footer Note */}
-                <p className="text-center text-muted-foreground text-sm mt-12">
-                    Paiement sécurisé via Stripe. Annulation possible à tout moment.
+            <div className="text-center mb-12 space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                <h1 className="text-4xl md:text-6xl font-black text-white uppercase italic tracking-tighter">
+                    Smart<span className="text-primary">Dalle</span> <span className="bg-gradient-to-r from-yellow-400 to-amber-600 bg-clip-text text-transparent">PREMIUM</span>
+                </h1>
+                <p className="text-muted-foreground text-lg max-w-xl mx-auto">
+                    Passe au niveau supérieur. Débloque l'IA et toutes les fonctionnalités pour gérer ta nutrition comme un chef.
                 </p>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-8 max-w-4xl w-full">
+
+                {/* Free Plan */}
+                <Card className="bg-card/30 border-input backdrop-blur-sm relative overflow-hidden group hover:border-white/20 transition-all duration-300">
+                    <CardHeader>
+                        <CardTitle className="text-2xl font-bold text-white">Starter</CardTitle>
+                        <CardDescription>Pour démarrer tranquillement</CardDescription>
+                        <div className="mt-4">
+                            <span className="text-4xl font-bold text-white">0€</span>
+                            <span className="text-muted-foreground"> / mois</span>
+                        </div>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <ul className="space-y-2">
+                            <li className="flex items-center gap-2 text-sm text-white"><Check className="h-4 w-4 text-primary" /> Génération de menus (limité)</li>
+                            <li className="flex items-center gap-2 text-sm text-white"><Check className="h-4 w-4 text-primary" /> Liste de courses</li>
+                            <li className="flex items-center gap-2 text-sm text-white"><Check className="h-4 w-4 text-primary" /> Export PDF</li>
+                            <li className="flex items-center gap-2 text-sm text-muted-foreground"><X className="h-4 w-4" /> Photos IA des plats</li>
+                            <li className="flex items-center gap-2 text-sm text-muted-foreground"><X className="h-4 w-4" /> Historique illimité</li>
+                        </ul>
+                    </CardContent>
+                    <CardFooter>
+                        <Button variant="outline" className="w-full font-bold" disabled>
+                            Plan Actuel
+                        </Button>
+                    </CardFooter>
+                </Card>
+
+                {/* Premium Plan */}
+                <Card className="bg-card border-primary/50 relative overflow-hidden shadow-2xl shadow-primary/10 scale-105 border-2">
+                    <div className="absolute top-0 right-0 bg-primary text-black text-xs font-bold px-3 py-1 rounded-bl-lg z-10">
+                        POPULAIRE
+                    </div>
+                    <div className="absolute -top-20 -right-20 w-40 h-40 bg-primary/20 blur-3xl rounded-full pointer-events-none"></div>
+
+                    <CardHeader>
+                        <CardTitle className="text-2xl font-bold text-white flex items-center gap-2">
+                            <Crown className="h-6 w-6 text-primary fill-primary" />
+                            Elite
+                        </CardTitle>
+                        <CardDescription>Tout SmartDalle. Sans limites.</CardDescription>
+                        <div className="mt-4">
+                            <span className="text-4xl font-bold text-white">9,99€</span>
+                            <span className="text-muted-foreground"> / mois</span>
+                        </div>
+                    </CardHeader>
+                    <CardContent className="space-y-4 relative z-10">
+                        <ul className="space-y-3">
+                            <li className="flex items-center gap-2 font-medium text-white"><Check className="h-5 w-5 text-green-500" /> Tout ce qu'il y a dans Starter</li>
+                            <li className="flex items-center gap-2 font-medium text-white"><Sparkles className="h-5 w-5 text-primary" /> Photos IA (DALL-E 3)</li>
+                            <li className="flex items-center gap-2 font-medium text-white"><Check className="h-5 w-5 text-green-500" /> Générations illimitées</li>
+                            <li className="flex items-center gap-2 font-medium text-white"><Check className="h-5 w-5 text-green-500" /> Support prioritaire</li>
+                        </ul>
+                    </CardContent>
+                    <CardFooter>
+                        <Button
+                            className="w-full bg-primary text-black hover:bg-primary/90 font-bold text-lg h-12 shadow-lg shadow-primary/25 cursor-pointer"
+                            onClick={handleUpgrade}
+                            disabled={isLoading}
+                        >
+                            {isLoading ? (
+                                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                            ) : (
+                                <Crown className="mr-2 h-5 w-5" />
+                            )}
+                            Passer Premium
+                        </Button>
+                    </CardFooter>
+                </Card>
             </div>
         </div>
     );
