@@ -25,8 +25,11 @@ export default async function ProgressPage() {
         .order("date", { ascending: false });
 
     return (
-        <div className="min-h-screen bg-background p-6 md:p-10 pb-24">
-            <div className="max-w-xl mx-auto space-y-8">
+        <div className="min-h-screen gradient-bg p-6 md:p-10 pb-24 relative overflow-hidden">
+            {/* Subtle Background Grid */}
+            <div className="absolute inset-0 bg-[linear-gradient(rgba(255,211,0,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,211,0,0.02)_1px,transparent_1px)] bg-[size:50px_50px] pointer-events-none" />
+
+            <div className="max-w-xl mx-auto space-y-8 relative z-10">
 
                 <header className="flex items-center justify-between">
                     <Link href="/dashboard">

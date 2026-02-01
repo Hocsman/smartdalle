@@ -1,64 +1,115 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
-import { Utensils, Zap, Euro } from "lucide-react";
+import { Utensils, Zap, Euro, Sparkles, ChefHat, TrendingUp } from "lucide-react";
 
 export default function Home() {
   return (
-    <main className="min-h-screen p-4 flex flex-col items-center justify-center relative bg-background overflow-hidden">
-      {/* Background Gradients/Effects could go here */}
+    <main className="min-h-screen flex flex-col items-center justify-center relative gradient-bg overflow-hidden">
+      {/* Animated Background Orbs */}
+      <div className="hero-orb hero-orb-1" />
+      <div className="hero-orb hero-orb-2" />
 
-      <div className="z-10 text-center max-w-2xl w-full space-y-8">
-        <h1 className="text-6xl font-extrabold tracking-tighter text-white uppercase italic">
-          Smart<span className="text-primary">Dalle</span>
-        </h1>
-        <p className="text-xl text-muted-foreground font-medium">
-          La nutrition intelligente pour la street. <br />
-          Mange propre, paie moins, reste vif.
-        </p>
+      {/* Decorative Grid Pattern */}
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,211,0,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,211,0,0.03)_1px,transparent_1px)] bg-[size:50px_50px] pointer-events-none" />
 
-        <div className="flex gap-4 justify-center">
+      <div className="z-10 text-center max-w-4xl w-full px-6 py-16 space-y-10">
+
+        {/* Badge */}
+        <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/30 text-primary text-sm font-bold px-4 py-2 rounded-full">
+          <Sparkles className="w-4 h-4" />
+          Street Food Healthy • IA Powered
+        </div>
+
+        {/* Hero Title */}
+        <div className="space-y-4">
+          <h1 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter text-white uppercase">
+            Smart<span className="text-primary text-glow">Dalle</span>
+          </h1>
+          <p className="text-xl md:text-2xl text-muted-foreground font-medium max-w-2xl mx-auto leading-relaxed">
+            La nutrition intelligente pour la <span className="text-white font-bold">street generation</span>.
+            <br className="hidden md:block" />
+            Mange propre. Paie moins. Reste <span className="text-primary font-bold">vif</span>.
+          </p>
+        </div>
+
+        {/* CTA Buttons */}
+        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
           <Link href="/dashboard">
-            <Button size="lg" className="text-lg font-bold px-8 cursor-pointer hover:scale-105 transition-transform">
+            <Button
+              size="lg"
+              className="text-lg font-black px-10 py-6 cursor-pointer btn-glow bg-primary text-black hover:bg-primary/90 rounded-xl"
+            >
+              <ChefHat className="mr-2 h-5 w-5" />
               Générer mon plan
             </Button>
           </Link>
           <Link href="/login">
-            <Button size="lg" variant="secondary" className="text-lg font-bold px-8 cursor-pointer hover:scale-105 transition-transform">
+            <Button
+              size="lg"
+              variant="outline"
+              className="text-lg font-bold px-10 py-6 cursor-pointer border-white/20 text-white hover:bg-white/10 hover:border-white/40 rounded-xl transition-all"
+            >
               Connexion
             </Button>
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-12 text-left">
-          <Card className="bg-card/50 border-input">
-            <CardHeader>
-              <Utensils className="w-8 h-8 text-primary mb-2" />
-              <CardTitle className="text-white">Culture</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground text-sm">Des repas qui ont du goût : Afro, Antillais, Maghreb, French Touch.</p>
-            </CardContent>
-          </Card>
-          <Card className="bg-card/50 border-input">
-            <CardHeader>
-              <Euro className="w-8 h-8 text-primary mb-2" />
-              <CardTitle className="text-white">Budget</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground text-sm">On respecte ton porte-monnaie avec des options Eco et Standard.</p>
-            </CardContent>
-          </Card>
-          <Card className="bg-card/50 border-input">
-            <CardHeader>
-              <Zap className="w-8 h-8 text-primary mb-2" />
-              <CardTitle className="text-white">Énergie</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground text-sm">Protéines et macros calibrés pour tes objos (masse, sèches, maintien).</p>
-            </CardContent>
-          </Card>
+        {/* Feature Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-12">
+
+          {/* Culture Card */}
+          <div className="glass-card glow-border rounded-2xl p-6 text-left transition-all duration-300 group">
+            <div className="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+              <Utensils className="w-7 h-7 text-primary" />
+            </div>
+            <h3 className="text-xl font-bold text-white mb-2">Culture</h3>
+            <p className="text-muted-foreground text-sm leading-relaxed">
+              Des repas qui ont du <span className="text-white">goût</span> : Afro, Antillais, Maghreb, French Touch. Ta culture, ton assiette.
+            </p>
+          </div>
+
+          {/* Budget Card */}
+          <div className="glass-card glow-border rounded-2xl p-6 text-left transition-all duration-300 group">
+            <div className="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+              <Euro className="w-7 h-7 text-primary" />
+            </div>
+            <h3 className="text-xl font-bold text-white mb-2">Budget Smart</h3>
+            <p className="text-muted-foreground text-sm leading-relaxed">
+              On respecte ton <span className="text-white">porte-monnaie</span>. Options Eco dès 3€ le repas ou Standard pour te faire plaisir.
+            </p>
+          </div>
+
+          {/* Energy Card */}
+          <div className="glass-card glow-border rounded-2xl p-6 text-left transition-all duration-300 group">
+            <div className="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+              <TrendingUp className="w-7 h-7 text-primary" />
+            </div>
+            <h3 className="text-xl font-bold text-white mb-2">Objectifs</h3>
+            <p className="text-muted-foreground text-sm leading-relaxed">
+              Protéines et macros <span className="text-white">calibrés</span> pour tes objos : prise de masse, sèche, ou maintien.
+            </p>
+          </div>
+
         </div>
+
+        {/* Stats/Social Proof */}
+        <div className="flex flex-wrap justify-center gap-8 pt-8 text-center">
+          <div className="space-y-1">
+            <p className="text-3xl font-black text-primary">500+</p>
+            <p className="text-sm text-muted-foreground">Recettes</p>
+          </div>
+          <div className="w-px h-12 bg-white/10 hidden sm:block" />
+          <div className="space-y-1">
+            <p className="text-3xl font-black text-primary">4.99€</p>
+            <p className="text-sm text-muted-foreground">Pro / mois</p>
+          </div>
+          <div className="w-px h-12 bg-white/10 hidden sm:block" />
+          <div className="space-y-1">
+            <p className="text-3xl font-black text-primary">IA</p>
+            <p className="text-sm text-muted-foreground">Powered</p>
+          </div>
+        </div>
+
       </div>
     </main>
   );

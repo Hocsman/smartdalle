@@ -33,8 +33,11 @@ export default async function PremiumPage() {
     const isPremium = profile?.is_premium === true;
 
     return (
-        <div className="min-h-screen bg-background p-6 md:p-10">
-            <div className="max-w-5xl mx-auto">
+        <div className="min-h-screen gradient-bg p-6 md:p-10 relative overflow-hidden">
+            {/* Subtle Background Grid */}
+            <div className="absolute inset-0 bg-[linear-gradient(rgba(255,211,0,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,211,0,0.02)_1px,transparent_1px)] bg-[size:50px_50px] pointer-events-none" />
+
+            <div className="max-w-5xl mx-auto relative z-10">
                 {/* Back Button */}
                 <Link href="/dashboard" className="inline-flex items-center text-muted-foreground hover:text-white mb-8">
                     <ArrowLeft className="w-4 h-4 mr-2" /> Retour au Dashboard
