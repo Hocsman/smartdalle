@@ -12,14 +12,23 @@ export async function login(formData: FormData) {
         password: formData.get("password") as string,
     };
 
-    const { error } = await supabase.auth.signInWithPassword(data);
+    let error;
+
+    try {
+        const { error: signInError } = await supabase.auth.signInWithPassword(data);
+        error = signInError;
+    } catch (e) {
+        console.error("Unexpected login error:", e);
+        return redirect("/login?error=Server error");
+    }
 
     if (error) {
-        redirect("/login?error=Could not authenticate user");
+        console.error("Login error:", error);
+        return redirect("/login?error=Could not authenticate user");
     }
 
     revalidatePath("/", "layout");
-    redirect("/onboarding"); // Direct transfer to onboarding logic
+    redirect("/onboarding");
 }
 
 export async function signup(formData: FormData) {
@@ -30,10 +39,19 @@ export async function signup(formData: FormData) {
         password: formData.get("password") as string,
     };
 
-    const { error } = await supabase.auth.signUp(data);
+    let error;
+
+    try {
+        const { error: signUpError } = await supabase.auth.signUp(data);
+        error = signUpError;
+    } catch (e) {
+        console.error("Unexpected signup error:", e);
+        return redirect("/login?error=Server error");
+    }
 
     if (error) {
-        redirect("/login?error=Could not authenticate user");
+        console.error("Signup error:", error);
+        return redirect("/login?error=Could not authenticate user");
     }
 
     revalidatePath("/", "layout");
