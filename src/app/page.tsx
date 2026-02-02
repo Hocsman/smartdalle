@@ -86,7 +86,7 @@ export default function Home() {
             </div>
             <h3 className="text-xl font-bold text-white mb-2">Objectifs</h3>
             <p className="text-muted-foreground text-sm leading-relaxed">
-              Protéines et macros <span className="text-white">calibrés</span> pour tes objos : prise de masse, sèche, ou maintien.
+              Protéines et macros <span className="text-white">calibrés</span> pour tes objectifs : prise de masse, sèche, ou maintien.
             </p>
           </div>
 
