@@ -85,7 +85,7 @@ export default async function DashboardPage() {
                                 <h1 className="text-3xl md:text-5xl font-extrabold text-white tracking-tight uppercase italic">
                                     Smart<span className="text-primary">Dalle</span>
                                 </h1>
-                                <p className="text-muted-foreground mt-2 text-lg flex flex-wrap items-center gap-2 max-w-2xl">
+                                <p className="text-muted-foreground mt-2 text-lg flex flex-wrap items-center gap-2 max-w-2xl lg:max-w-none lg:text-base lg:whitespace-nowrap lg:truncate">
                                     Wesh <span className="text-white font-bold capitalize">{pseudo}</span>
                                     {isPremium && (
                                         <span className="inline-flex items-center gap-1 bg-gradient-to-r from-yellow-500 to-amber-600 text-black text-xs font-black px-2 py-0.5 rounded-full">
