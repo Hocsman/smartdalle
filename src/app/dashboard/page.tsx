@@ -80,12 +80,12 @@ export default async function DashboardPage() {
 
                 <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
                     <div className="flex-1">
-                        <div className="flex justify-between items-start w-full">
-                            <div>
+                        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6 w-full">
+                            <div className="min-w-0">
                                 <h1 className="text-3xl md:text-5xl font-extrabold text-white tracking-tight uppercase italic">
                                     Smart<span className="text-primary">Dalle</span>
                                 </h1>
-                                <p className="text-muted-foreground mt-2 text-lg flex items-center gap-2">
+                                <p className="text-muted-foreground mt-2 text-lg flex flex-wrap items-center gap-2 max-w-2xl">
                                     Wesh <span className="text-white font-bold capitalize">{pseudo}</span>
                                     {isPremium && (
                                         <span className="inline-flex items-center gap-1 bg-gradient-to-r from-yellow-500 to-amber-600 text-black text-xs font-black px-2 py-0.5 rounded-full">
@@ -97,7 +97,7 @@ export default async function DashboardPage() {
                             </div>
 
                             {/* Gamification Streak & History Link */}
-                            <div className="flex gap-3">
+                            <div className="flex flex-wrap gap-3 justify-start lg:justify-end">
                                 <NotificationButton />
                                 <Link href="/shopping-list">
                                     <div className="flex flex-col items-center bg-card border border-input p-2 rounded-lg cursor-pointer hover:border-primary transition-colors">
