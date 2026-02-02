@@ -2,9 +2,10 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Check, Crown, Loader2, Sparkles, X } from "lucide-react";
+import { ArrowLeft, Check, Crown, Loader2, Sparkles, X } from "lucide-react";
 import { useState } from "react";
 import { createCheckoutSession } from "./actions";
+import Link from "next/link";
 
 export default function PremiumPage() {
     const [isLoading, setIsLoading] = useState(false);
@@ -29,6 +30,14 @@ export default function PremiumPage() {
 
     return (
         <div className="min-h-screen gradient-bg p-6 md:p-10 flex flex-col items-center justify-center">
+            <div className="w-full max-w-4xl mb-6">
+                <Link
+                    href="/dashboard"
+                    className="inline-flex items-center text-muted-foreground hover:text-white text-sm transition-colors"
+                >
+                    <ArrowLeft className="mr-2 h-4 w-4" /> Retour au dashboard
+                </Link>
+            </div>
 
             <div className="text-center mb-12 space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
                 <h1 className="text-4xl md:text-6xl font-black text-white uppercase italic tracking-tighter">
