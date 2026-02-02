@@ -70,3 +70,33 @@ export async function updateProfile(formData: FormData) {
     revalidatePath("/dashboard");
     redirect("/profile?updated=1");
 }
+
+export async function updateAvatarUrl(avatarUrl: string) {
+    const supabase = await createClient();
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+        throw new Error("Unauthorized");
+    }
+
+    const { error } = await supabase
+        .from("profiles")
+        .update({ avatar_url: avatarUrl })
+        .eq("id", user.id);
+
+    if (error) {
+        console.error("Avatar update failed:", error);
+        throw new Error("Avatar update failed");
+    }
+
+    revalidatePath("/profile");
+    revalidatePath("/dashboard");
+}
+
+export async function signOut() {
+    const supabase = await createClient();
+    await supabase.auth.signOut();
+    redirect("/login");
+}

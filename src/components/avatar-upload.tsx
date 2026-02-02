@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
-import { updateAvatarUrl } from "@/app/actions/update-profile";
+import { updateAvatarUrl } from "@/app/profile/actions";
 import { Button } from "@/components/ui/button";
 
 interface AvatarUploadProps {

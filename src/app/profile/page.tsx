@@ -1,11 +1,12 @@
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
-import { updateProfile } from "./actions";
+import { signOut, updateProfile } from "./actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { ArrowLeft, User } from "lucide-react";
+import { AvatarUpload } from "@/components/avatar-upload";
 
 export const dynamic = "force-dynamic";
 
@@ -48,6 +49,11 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                         Profil mis à jour ✅
                     </div>
                 ) : null}
+
+                <section className="bg-card/40 border border-input rounded-2xl p-6 space-y-4">
+                    <h2 className="text-lg font-bold text-white">Avatar</h2>
+                    <AvatarUpload userId={user.id} avatarUrl={profile?.avatar_url} />
+                </section>
 
                 <form action={updateProfile} className="space-y-6 bg-card/40 border border-input rounded-2xl p-6">
                     <div className="space-y-2">
@@ -158,6 +164,20 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                         Sauvegarder mon profil
                     </Button>
                 </form>
+
+                <section className="bg-card/40 border border-red-500/20 rounded-2xl p-6 space-y-4">
+                    <h2 className="text-lg font-bold text-white">Zone danger</h2>
+                    <div className="flex flex-col md:flex-row gap-4 md:items-center md:justify-between">
+                        <form action={signOut}>
+                            <Button type="submit" variant="destructive" className="w-full md:w-auto">
+                                Se déconnecter
+                            </Button>
+                        </form>
+                        <Link href="/premium" className="text-sm text-muted-foreground hover:text-white underline">
+                            Gérer mon abonnement
+                        </Link>
+                    </div>
+                </section>
             </div>
         </div>
     );
