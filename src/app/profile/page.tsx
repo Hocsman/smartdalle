@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { ArrowLeft, User } from "lucide-react";
 import { AvatarUpload } from "@/components/avatar-upload";
+import { ManageSubscriptionButton } from "@/components/ManageSubscriptionButton";
 
 export const dynamic = "force-dynamic";
 
@@ -173,9 +174,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                                 Se déconnecter
                             </Button>
                         </form>
-                        <Link href="/premium" className="text-sm text-muted-foreground hover:text-white underline">
-                            Gérer mon abonnement
-                        </Link>
+                        <ManageSubscriptionButton />
                     </div>
                 </section>
             </div>
