@@ -5,9 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
-import { ArrowLeft, User } from "lucide-react";
+import { ArrowLeft, User, Headphones } from "lucide-react";
 import { AvatarUpload } from "@/components/avatar-upload";
 import { ManageSubscriptionButton } from "@/components/ManageSubscriptionButton";
+import { SupportForm } from "@/components/support-form";
 
 export const dynamic = "force-dynamic";
 
@@ -165,6 +166,17 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                         Sauvegarder mon profil
                     </Button>
                 </form>
+
+                <section className="bg-card/40 border border-input rounded-2xl p-6 space-y-4">
+                    <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                        <Headphones className="h-5 w-5 text-primary" />
+                        Support
+                    </h2>
+                    <SupportForm
+                        isPremium={profile?.is_premium === true}
+                        userEmail={user.email || ""}
+                    />
+                </section>
 
                 <section className="bg-card/40 border border-red-500/20 rounded-2xl p-6 space-y-4">
                     <h2 className="text-lg font-bold text-white">Zone danger</h2>
