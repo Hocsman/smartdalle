@@ -41,11 +41,11 @@ export function SupportForm({ isPremium, userEmail }: SupportFormProps) {
                 <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto">
                     <CheckCircle className="w-8 h-8 text-green-500" />
                 </div>
-                <h3 className="text-lg font-bold text-white">Message envoy&eacute; !</h3>
+                <h3 className="text-lg font-bold text-white">Message envoyé !</h3>
                 <p className="text-muted-foreground text-sm">
                     {isPremium
-                        ? "Notre \u00e9quipe te r\u00e9pondra sous 24h maximum."
-                        : "Notre \u00e9quipe te r\u00e9pondra sous 72h."}
+                        ? "Notre équipe te répondra sous 24h maximum."
+                        : "Notre équipe te répondra sous 72h."}
                 </p>
                 <Button
                     variant="outline"
@@ -70,7 +70,7 @@ export function SupportForm({ isPremium, userEmail }: SupportFormProps) {
                         <Crown className="w-5 h-5 text-yellow-500" />
                         <div>
                             <p className="text-sm font-bold text-white">Support Prioritaire</p>
-                            <p className="text-xs text-yellow-500/80">R&eacute;ponse garantie sous 24h</p>
+                            <p className="text-xs text-yellow-500/80">Réponse garantie sous 24h</p>
                         </div>
                     </>
                 ) : (
@@ -78,7 +78,7 @@ export function SupportForm({ isPremium, userEmail }: SupportFormProps) {
                         <Clock className="w-5 h-5 text-muted-foreground" />
                         <div>
                             <p className="text-sm font-bold text-white">Support Standard</p>
-                            <p className="text-xs text-muted-foreground">R&eacute;ponse sous 72h</p>
+                            <p className="text-xs text-muted-foreground">Réponse sous 72h</p>
                         </div>
                     </>
                 )}
@@ -86,7 +86,7 @@ export function SupportForm({ isPremium, userEmail }: SupportFormProps) {
 
             <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
-                    <Label className="text-white">Email de r&eacute;ponse</Label>
+                    <Label className="text-white">Email de réponse</Label>
                     <Input
                         value={userEmail}
                         readOnly
@@ -99,7 +99,7 @@ export function SupportForm({ isPremium, userEmail }: SupportFormProps) {
                     <Input
                         name="subject"
                         required
-                        placeholder="Ex: Probl\u00e8me avec la g\u00e9n\u00e9ration de menu"
+                        placeholder="Ex: Problème avec la génération de menu"
                         className="bg-secondary/60 border-white/10 text-white placeholder:text-muted-foreground"
                     />
                 </div>
@@ -110,7 +110,7 @@ export function SupportForm({ isPremium, userEmail }: SupportFormProps) {
                         name="message"
                         required
                         rows={5}
-                        placeholder="D\u00e9cris ton probl\u00e8me ou ta question en d\u00e9tail..."
+                        placeholder="Décris ton problème ou ta question en détail..."
                         className="w-full rounded-xl bg-secondary/60 border border-white/10 text-white px-3 py-2 placeholder:text-muted-foreground resize-none focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                 </div>
