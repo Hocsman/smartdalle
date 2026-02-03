@@ -13,11 +13,10 @@ self.addEventListener("push", (event) => {
 
     try {
         const data = event.data.json();
-        const options: NotificationOptions = {
+        const options = {
             body: data.body || "Nouvelle notification SmartDalle",
             icon: data.icon || "/icon-192x192.png",
             badge: data.badge || "/badge-72x72.png",
-            vibrate: [100, 50, 100],
             data: {
                 url: data.url || "/dashboard",
                 dateOfArrival: Date.now(),
