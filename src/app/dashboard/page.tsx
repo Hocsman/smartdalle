@@ -136,6 +136,16 @@ export default async function DashboardPage() {
                                 </form>
                             )}
                             <AiGeneratorButton isPremium={isPremium} />
+
+                            {/* CTA Premium - Only for free users */}
+                            {!isPremium && (
+                                <Link href="/premium">
+                                    <Button size="sm" className="bg-gradient-to-r from-yellow-500 to-amber-600 text-black font-bold hover:from-yellow-400 hover:to-amber-500 shadow-lg shadow-yellow-500/25 animate-pulse hover:animate-none">
+                                        <Crown className="h-4 w-4 mr-1 md:mr-2" />
+                                        <span className="text-xs md:text-sm">Go Pro</span>
+                                    </Button>
+                                </Link>
+                            )}
                         </div>
                     </div>
 
