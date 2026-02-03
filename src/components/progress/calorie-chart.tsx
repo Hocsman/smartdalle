@@ -78,7 +78,7 @@ export function CalorieChart({ data, goalCalories }: CalorieChartProps) {
                         }}
                         labelStyle={{ color: "#fff" }}
                         itemStyle={{ color: "#22c55e" }}
-                        formatter={(value: number) => [`${value} kcal`, "Calories"]}
+                        formatter={(value) => [`${value} kcal`, "Calories"]}
                     />
                     <ReferenceLine
                         y={goalCalories}
