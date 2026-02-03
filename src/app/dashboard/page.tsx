@@ -8,6 +8,7 @@ import Link from "next/link";
 import { AiGeneratorButton } from "@/components/ai-generator-button";
 import { DashboardRecipesClient } from "@/components/dashboard-recipes-client";
 import { getFavoriteIds } from "@/app/actions/favorites";
+import { getUserStreak } from "@/app/progress/actions";
 import { NotificationButton } from "@/components/notification-settings";
 import { GenerateButton } from "@/components/GenerateButton";
 
@@ -71,6 +72,15 @@ export default async function DashboardPage() {
     // Fetch User's Favorites
     const favoriteIds = await getFavoriteIds();
 
+    // Fetch User's Streak
+    let streak = 0;
+    try {
+        streak = await getUserStreak();
+    } catch {
+        // Fallback if table doesn't exist yet
+        streak = 0;
+    }
+
     return (
         <div className="min-h-screen gradient-bg p-6 md:p-10 mb-20 relative overflow-hidden">
             {/* Subtle Background Grid */}
@@ -118,7 +128,7 @@ export default async function DashboardPage() {
                             <Link href="/progress">
                                 <div className="flex flex-col items-center bg-card border border-input p-2 rounded-lg cursor-pointer hover:border-primary transition-colors min-w-[60px]">
                                     <div className="flex items-center gap-1 text-orange-500 font-black text-lg">
-                                        <span className="text-xl">🔥</span> 3
+                                        <span className="text-xl">🔥</span> {streak}
                                     </div>
                                     <span className="text-[10px] uppercase font-bold text-muted-foreground">Série</span>
                                 </div>

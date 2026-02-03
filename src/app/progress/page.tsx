@@ -3,7 +3,8 @@ import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ArrowLeft, TrendingUp } from "lucide-react";
-import WeightTracker from "@/components/weight-tracker";
+import { ProgressTabs } from "./progress-tabs";
+import { getNutritionLogs, getTodayLog, getUserGoals, getUserStreak } from "./actions";
 
 // Force dynamic because we fetch fresh data
 export const dynamic = "force-dynamic";
@@ -17,12 +18,42 @@ export default async function ProgressPage() {
 
     if (!user) return redirect("/login");
 
-    // Fetch Weight Logs (Latest first)
-    const { data: logs } = await supabase
-        .from("weight_logs")
-        .select("*")
-        .eq("user_id", user.id)
-        .order("date", { ascending: false });
+    // Fetch all data in parallel
+    const [weightLogsResult, nutritionLogs, todayLog, goals] = await Promise.all([
+        supabase
+            .from("weight_logs")
+            .select("*")
+            .eq("user_id", user.id)
+            .order("date", { ascending: false }),
+        getNutritionLogs(7).catch(() => []),
+        getTodayLog().catch(() => null),
+        getUserGoals().catch(() => ({
+            daily_calories: 2000,
+            daily_protein: 100,
+            daily_carbs: 250,
+            daily_fat: 65,
+        })),
+    ]);
+
+    // Calculate streak (fallback if SQL function doesn't exist)
+    let streak = 0;
+    try {
+        streak = await getUserStreak();
+    } catch {
+        // Fallback: count consecutive days with logs
+        const today = new Date();
+        for (let i = 0; i < 365; i++) {
+            const checkDate = new Date(today);
+            checkDate.setDate(today.getDate() - i);
+            const dateStr = checkDate.toISOString().split("T")[0];
+            const hasLog = nutritionLogs.some((log) => log.date === dateStr && log.calories_consumed > 0);
+            if (hasLog) {
+                streak++;
+            } else if (i > 0) {
+                break;
+            }
+        }
+    }
 
     return (
         <div className="min-h-screen gradient-bg p-6 md:p-10 pb-24 relative overflow-hidden">
@@ -42,7 +73,13 @@ export default async function ProgressPage() {
                     </h1>
                 </header>
 
-                <WeightTracker logs={logs || []} />
+                <ProgressTabs
+                    weightLogs={weightLogsResult.data || []}
+                    nutritionLogs={nutritionLogs}
+                    todayLog={todayLog}
+                    goals={goals}
+                    streak={streak}
+                />
 
             </div>
         </div>

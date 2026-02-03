@@ -7,6 +7,7 @@ import { ArrowLeft, Utensils, Flame, Euro } from "lucide-react";
 import { AiGeneratorButton } from "@/components/ai-generator-button";
 import { RecipeTabsSection } from "./recipe-tabs-section";
 import { FavoriteButton } from "@/components/favorite-button";
+import { LogMealButton } from "@/components/log-meal-button";
 
 interface RecipePageProps {
     params: Promise<{
@@ -145,6 +146,22 @@ export default async function RecipePage({ params }: RecipePageProps) {
                     ingredients={ingredientsList}
                     instructionSteps={instructionSteps}
                 />
+
+                {/* Log Meal Button */}
+                {user && (
+                    <div className="mt-6">
+                        <LogMealButton
+                            recipeId={recipe.id}
+                            recipeName={recipe.name}
+                            nutrition={{
+                                calories: recipe.calories || 0,
+                                protein: recipe.protein || 0,
+                                carbs: recipe.carbs || 0,
+                                fat: recipe.fat || 0,
+                            }}
+                        />
+                    </div>
+                )}
 
             </div>
         </div>
