@@ -76,86 +76,85 @@ export default async function DashboardPage() {
             {/* Subtle Background Grid */}
             <div className="absolute inset-0 bg-[linear-gradient(rgba(255,211,0,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,211,0,0.02)_1px,transparent_1px)] bg-[size:50px_50px] pointer-events-none" />
 
-            <div className="max-w-7xl mx-auto space-y-8 relative z-10">
+            <div className="max-w-7xl mx-auto space-y-6 relative z-10">
 
-                <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
-                    <div className="flex-1">
-                        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6 w-full">
-                            <div className="min-w-0">
-                                <h1 className="text-3xl md:text-5xl font-extrabold text-white tracking-tight uppercase italic">
-                                    Smart<span className="text-primary">Dalle</span>
-                                </h1>
-                                <p className="text-muted-foreground mt-2 text-lg flex flex-wrap items-center gap-2 max-w-2xl lg:max-w-none lg:text-base lg:whitespace-nowrap lg:truncate">
-                                    Wesh <span className="text-white font-bold capitalize">{pseudo}</span>
-                                    {isPremium && (
-                                        <span className="inline-flex items-center gap-1 bg-gradient-to-r from-yellow-500 to-amber-600 text-black text-xs font-black px-2 py-0.5 rounded-full">
-                                            <Crown className="w-3 h-3" /> PRO
-                                        </span>
-                                    )}
-                                    , voici ton fuel pour aujourd&apos;hui 🔥
-                                </p>
-                            </div>
+                {/* Header Bar */}
+                <header className="flex flex-col gap-4">
+                    {/* Top Row: Logo + Nav + Buttons */}
+                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                        {/* Logo */}
+                        <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight uppercase italic shrink-0">
+                            Smart<span className="text-primary">Dalle</span>
+                        </h1>
 
-                            {/* Gamification Streak & History Link */}
-                            <div className="flex flex-wrap gap-3 justify-start lg:justify-end">
-                                <NotificationButton />
-                                <Link href="/shopping-list">
-                                    <div className="flex flex-col items-center bg-card border border-input p-2 rounded-lg cursor-pointer hover:border-primary transition-colors">
-                                        <ShoppingCart className="h-5 w-5 text-primary" />
-                                        <span className="text-[10px] uppercase font-bold text-muted-foreground">Courses</span>
+                        {/* Nav Icons + Action Buttons */}
+                        <div className="flex flex-wrap items-center gap-3">
+                            {/* Navigation Icons */}
+                            <NotificationButton />
+                            <Link href="/shopping-list">
+                                <div className="flex flex-col items-center bg-card border border-input p-2 rounded-lg cursor-pointer hover:border-primary transition-colors min-w-[60px]">
+                                    <ShoppingCart className="h-5 w-5 text-primary" />
+                                    <span className="text-[10px] uppercase font-bold text-muted-foreground">Courses</span>
+                                </div>
+                            </Link>
+                            <Link href="/favorites">
+                                <div className="flex flex-col items-center bg-card border border-input p-2 rounded-lg cursor-pointer hover:border-primary transition-colors min-w-[60px]">
+                                    <Heart className="h-5 w-5 text-primary" />
+                                    <span className="text-[10px] uppercase font-bold text-muted-foreground">Favoris</span>
+                                </div>
+                            </Link>
+                            <Link href="/profile">
+                                <div className="flex flex-col items-center bg-card border border-input p-2 rounded-lg cursor-pointer hover:border-primary transition-colors min-w-[60px]">
+                                    <User className="h-5 w-5 text-primary" />
+                                    <span className="text-[10px] uppercase font-bold text-muted-foreground">Profil</span>
+                                </div>
+                            </Link>
+                            <Link href="/history">
+                                <div className="flex flex-col items-center bg-card border border-input p-2 rounded-lg cursor-pointer hover:border-primary transition-colors min-w-[60px]">
+                                    <History className="h-5 w-5 text-primary" />
+                                    <span className="text-[10px] uppercase font-bold text-muted-foreground">Historique</span>
+                                </div>
+                            </Link>
+                            <Link href="/progress">
+                                <div className="flex flex-col items-center bg-card border border-input p-2 rounded-lg cursor-pointer hover:border-primary transition-colors min-w-[60px]">
+                                    <div className="flex items-center gap-1 text-orange-500 font-black text-lg">
+                                        <span className="text-xl">🔥</span> 3
                                     </div>
-                                </Link>
-                                <Link href="/favorites">
-                                    <div className="flex flex-col items-center bg-card border border-input p-2 rounded-lg cursor-pointer hover:border-primary transition-colors">
-                                        <Heart className="h-5 w-5 text-primary" />
-                                        <span className="text-[10px] uppercase font-bold text-muted-foreground">Favoris</span>
-                                    </div>
-                                </Link>
-                                <Link href="/profile">
-                                    <div className="flex flex-col items-center bg-card border border-input p-2 rounded-lg cursor-pointer hover:border-primary transition-colors">
-                                        <User className="h-5 w-5 text-primary" />
-                                        <span className="text-[10px] uppercase font-bold text-muted-foreground">Profil</span>
-                                    </div>
-                                </Link>
-                                <Link href="/history">
-                                    <div className="flex flex-col items-center bg-card border border-input p-2 rounded-lg cursor-pointer hover:border-primary transition-colors">
-                                        <History className="h-5 w-5 text-primary" />
-                                        <span className="text-[10px] uppercase font-bold text-muted-foreground">Historique</span>
-                                    </div>
-                                </Link>
-                                <Link href="/progress">
-                                    <div className="flex flex-col items-center bg-card border border-input p-2 rounded-lg cursor-pointer hover:border-primary transition-colors">
-                                        <div className="flex items-center gap-1 text-orange-500 font-black text-xl">
-                                            <span className="text-2xl">🔥</span> 3
-                                        </div>
-                                        <span className="text-[10px] uppercase font-bold text-muted-foreground">Série</span>
-                                    </div>
-                                </Link>
-                            </div>
+                                    <span className="text-[10px] uppercase font-bold text-muted-foreground">Série</span>
+                                </div>
+                            </Link>
+
+                            {/* Divider */}
+                            <div className="hidden lg:block w-px h-10 bg-input mx-1" />
+
+                            {/* Action Buttons */}
+                            {!dailyPlan && (
+                                <form action={generatePlan}>
+                                    <Button size="default" className="bg-primary text-black font-bold hover:bg-primary/90 shadow-sm shadow-primary/20 cursor-pointer">
+                                        <Sparkles className="mr-2 h-4 w-4" /> Générer mon Menu
+                                    </Button>
+                                </form>
+                            )}
+                            <AiGeneratorButton isPremium={isPremium} />
                         </div>
+                    </div>
 
+                    {/* Greeting Row */}
+                    <p className="text-muted-foreground text-base md:text-lg">
+                        Wesh <span className="text-white font-bold capitalize">{pseudo}</span>
+                        {isPremium && (
+                            <span className="inline-flex items-center gap-1 bg-gradient-to-r from-yellow-500 to-amber-600 text-black text-xs font-black px-2 py-0.5 rounded-full mx-2">
+                                <Crown className="w-3 h-3" /> PRO
+                            </span>
+                        )}
+                        {!isPremium && <span>, </span>}
+                        voici ton fuel pour aujourd&apos;hui 🔥
                         {dailyPlan && (
-                            <Link href="/shopping-list" className="inline-block mt-4 text-sm text-primary hover:text-white underline underline-offset-4 font-bold transition-colors">
+                            <Link href="/shopping-list" className="ml-4 text-sm text-primary hover:text-white underline underline-offset-4 font-bold transition-colors">
                                 → Voir ma liste de courses
                             </Link>
                         )}
-                    </div>
-
-                    {!dailyPlan && (
-                        <div className="flex flex-col sm:flex-row gap-4">
-                            <form action={generatePlan}>
-                                <Button size="lg" className="bg-primary text-black font-bold text-lg hover:bg-primary/90 px-8 shadow-sm shadow-primary/20 cursor-pointer">
-                                    <Sparkles className="mr-2 h-5 w-5" /> Générer mon Menu
-                                </Button>
-                            </form>
-                            <AiGeneratorButton isPremium={isPremium} />
-                        </div>
-                    )}
-                    {dailyPlan && (
-                        <div className="mt-4 md:mt-0">
-                            <AiGeneratorButton isPremium={isPremium} />
-                        </div>
-                    )}
+                    </p>
                 </header>
 
                 <section>
