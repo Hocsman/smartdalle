@@ -174,7 +174,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                                 Se déconnecter
                             </Button>
                         </form>
-                        <ManageSubscriptionButton />
+                        {profile?.stripe_customer_id && <ManageSubscriptionButton />}
                     </div>
                 </section>
             </div>
