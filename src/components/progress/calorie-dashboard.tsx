@@ -6,6 +6,7 @@ import { CircularProgress } from "./circular-progress";
 import { MacroBars } from "./macro-bars";
 import { MealsList } from "./meals-list";
 import { StreakDisplay } from "./streak-display";
+import { GoalsForm } from "./goals-form";
 import { Card, CardContent } from "@/components/ui/card";
 import { Utensils, TrendingUp, Target } from "lucide-react";
 
@@ -91,6 +92,9 @@ export function CalorieDashboard({ weeklyLogs, todayLog, goals, streak }: Calori
                     <MealsList meals={today.meals} />
                 </CardContent>
             </Card>
+
+            {/* Goals Settings */}
+            <GoalsForm currentGoals={goals} />
 
             {/* Info Card */}
             <div className="p-4 bg-primary/10 rounded-xl border border-primary/20 text-center">
