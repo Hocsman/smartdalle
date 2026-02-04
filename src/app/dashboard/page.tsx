@@ -11,6 +11,7 @@ import { getFavoriteIds } from "@/app/actions/favorites";
 import { getUserStreak } from "@/app/progress/actions";
 import { NotificationButton } from "@/components/notification-settings";
 import { GenerateButton } from "@/components/GenerateButton";
+import { InstallPWAButton } from "@/components/install-pwa-guide";
 
 export const dynamic = "force-dynamic";
 
@@ -100,6 +101,7 @@ export default async function DashboardPage() {
                         {/* Nav Icons + Action Buttons */}
                         <div className="flex flex-wrap items-center gap-3">
                             {/* Navigation Icons */}
+                            <InstallPWAButton />
                             <NotificationButton />
                             <Link href="/shopping-list">
                                 <div className="flex flex-col items-center bg-card border border-input p-2 rounded-lg cursor-pointer hover:border-primary transition-colors min-w-[60px]">
