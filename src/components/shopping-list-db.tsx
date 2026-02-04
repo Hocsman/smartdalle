@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Check, Trash2, ShoppingCart, Sparkles, AlertTriangle, Loader2 } from "lucide-react";
+import { Check, Trash2, ShoppingCart, Sparkles, Loader2, ChevronDown } from "lucide-react";
 import { toggleShoppingItem, deleteShoppingItem, clearShoppingList } from "@/app/actions/add-to-shopping-list";
+import { categorizeIngredient, CATEGORIES } from "@/utils/categories";
 
 interface ShoppingItem {
     id: string;
@@ -22,18 +23,36 @@ interface ShoppingListDbProps {
 export default function ShoppingListDb({ items }: ShoppingListDbProps) {
     const [isPending, startTransition] = useTransition();
     const [pendingItemId, setPendingItemId] = useState<string | null>(null);
+    const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set());
 
     const checkedCount = items.filter((item) => item.is_checked).length;
     const progress = items.length > 0 ? Math.round((checkedCount / items.length) * 100) : 0;
     const allChecked = checkedCount === items.length && items.length > 0;
 
-    // Group items by recipe
-    const groupedItems = items.reduce((acc, item) => {
-        const recipeName = item.recipes?.name || "Autres";
-        if (!acc[recipeName]) acc[recipeName] = [];
-        acc[recipeName].push(item);
-        return acc;
-    }, {} as Record<string, ShoppingItem[]>);
+    // Group items by store category (rayon)
+    const categorizedItems = useMemo(() => {
+        const groups: Record<string, ShoppingItem[]> = {};
+        items.forEach((item) => {
+            const cat = categorizeIngredient(item.ingredient_name);
+            if (!groups[cat]) groups[cat] = [];
+            groups[cat].push(item);
+        });
+        return groups;
+    }, [items]);
+
+    // Get only categories that have items, in CATEGORIES order
+    const activeCategories = useMemo(() => {
+        return CATEGORIES.filter((cat) => categorizedItems[cat.name]?.length > 0);
+    }, [categorizedItems]);
+
+    const toggleSection = (sectionName: string) => {
+        setCollapsedSections((prev) => {
+            const next = new Set(prev);
+            if (next.has(sectionName)) next.delete(sectionName);
+            else next.add(sectionName);
+            return next;
+        });
+    };
 
     const handleToggle = (itemId: string, currentState: boolean) => {
         setPendingItemId(itemId);
@@ -135,80 +154,107 @@ export default function ShoppingListDb({ items }: ShoppingListDbProps) {
                     </CardContent>
                 </Card>
             ) : (
-                /* Grouped Lists by Recipe */
-                Object.entries(groupedItems).map(([recipeName, recipeItems]) => (
-                    <Card key={recipeName} className="bg-card border-input">
-                        <CardHeader className="pb-2">
-                            <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                                <span className="text-primary">📌</span>
-                                {recipeName}
-                                <span className="text-sm font-normal text-muted-foreground ml-auto">
-                                    {recipeItems.filter((i) => i.is_checked).length}/{recipeItems.length}
-                                </span>
-                            </h3>
-                        </CardHeader>
-                        <CardContent className="pt-0">
-                            <div className="space-y-2">
-                                {recipeItems.map((item) => {
-                                    const isItemPending = pendingItemId === item.id;
-                                    return (
-                                        <div
-                                            key={item.id}
-                                            className={`
-                                                group flex items-center gap-4 p-3 rounded-lg border transition-all duration-200
-                                                ${item.is_checked
-                                                    ? "bg-green-500/10 border-green-500/30"
-                                                    : "bg-secondary/20 border-input hover:border-primary/50"
-                                                }
-                                            `}
-                                        >
-                                            {/* Checkbox Circle */}
-                                            <button
-                                                onClick={() => handleToggle(item.id, item.is_checked)}
-                                                disabled={isPending}
-                                                className={`
-                                                    h-6 w-6 rounded-full border-2 flex items-center justify-center transition-all duration-200 cursor-pointer
-                                                    ${item.is_checked
-                                                        ? "bg-green-500 border-green-500 text-white"
-                                                        : "border-muted-foreground hover:border-primary"
-                                                    }
-                                                    ${isItemPending ? "opacity-50" : ""}
-                                                `}
-                                            >
-                                                {isItemPending ? (
-                                                    <Loader2 className="h-3 w-3 animate-spin" />
-                                                ) : item.is_checked ? (
-                                                    <Check className="h-4 w-4 stroke-[3px]" />
-                                                ) : null}
-                                            </button>
+                /* Grouped Lists by Store Category (Rayon) */
+                activeCategories.map((cat) => {
+                    const categoryItems = categorizedItems[cat.name];
+                    const sectionChecked = categoryItems.filter((i) => i.is_checked).length;
+                    const isCollapsed = collapsedSections.has(cat.name);
+                    const sectionComplete = sectionChecked === categoryItems.length;
 
-                                            {/* Ingredient Name + Quantity */}
-                                            <div className="flex-1">
-                                                <span className={`${item.is_checked ? "line-through text-muted-foreground" : "text-white"}`}>
-                                                    {item.ingredient_name}
-                                                </span>
-                                                {item.quantity && (
-                                                    <span className="ml-2 text-sm text-primary font-medium">
-                                                        {item.quantity}
-                                                    </span>
-                                                )}
-                                            </div>
+                    return (
+                        <Card key={cat.name} className={`bg-card border-input transition-all ${sectionComplete ? "border-green-500/30" : ""}`}>
+                            <CardHeader
+                                className="pb-2 cursor-pointer select-none"
+                                onClick={() => toggleSection(cat.name)}
+                            >
+                                <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                                    <span className="text-2xl">{cat.emoji}</span>
+                                    {cat.name}
+                                    <span className={`text-sm font-normal ml-auto ${sectionComplete ? "text-green-400" : "text-muted-foreground"}`}>
+                                        {sectionChecked}/{categoryItems.length}
+                                    </span>
+                                    <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${isCollapsed ? "-rotate-90" : ""}`} />
+                                </h3>
+                                {/* Mini progress bar per section */}
+                                <div className="w-full h-1.5 bg-secondary rounded-full overflow-hidden mt-2">
+                                    <div
+                                        className={`h-full transition-all duration-500 ${sectionComplete ? "bg-green-500" : "bg-primary"}`}
+                                        style={{ width: `${categoryItems.length > 0 ? Math.round((sectionChecked / categoryItems.length) * 100) : 0}%` }}
+                                    />
+                                </div>
+                            </CardHeader>
+                            {!isCollapsed && (
+                                <CardContent className="pt-0">
+                                    <div className="space-y-2">
+                                        {categoryItems.map((item) => {
+                                            const isItemPending = pendingItemId === item.id;
+                                            return (
+                                                <div
+                                                    key={item.id}
+                                                    className={`
+                                                        group flex items-center gap-4 p-3 rounded-lg border transition-all duration-200
+                                                        ${item.is_checked
+                                                            ? "bg-green-500/10 border-green-500/30"
+                                                            : "bg-secondary/20 border-input hover:border-primary/50"
+                                                        }
+                                                    `}
+                                                >
+                                                    {/* Checkbox Circle */}
+                                                    <button
+                                                        onClick={() => handleToggle(item.id, item.is_checked)}
+                                                        disabled={isPending}
+                                                        className={`
+                                                            h-6 w-6 rounded-full border-2 flex items-center justify-center transition-all duration-200 cursor-pointer shrink-0
+                                                            ${item.is_checked
+                                                                ? "bg-green-500 border-green-500 text-white"
+                                                                : "border-muted-foreground hover:border-primary"
+                                                            }
+                                                            ${isItemPending ? "opacity-50" : ""}
+                                                        `}
+                                                    >
+                                                        {isItemPending ? (
+                                                            <Loader2 className="h-3 w-3 animate-spin" />
+                                                        ) : item.is_checked ? (
+                                                            <Check className="h-4 w-4 stroke-[3px]" />
+                                                        ) : null}
+                                                    </button>
 
-                                            {/* Delete Button */}
-                                            <button
-                                                onClick={() => handleDelete(item.id)}
-                                                disabled={isPending}
-                                                className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-red-400 transition-all cursor-pointer"
-                                            >
-                                                <Trash2 className="h-4 w-4" />
-                                            </button>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        </CardContent>
-                    </Card>
-                ))
+                                                    {/* Ingredient Name + Quantity + Recipe Source */}
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="flex items-center gap-2">
+                                                            <span className={`${item.is_checked ? "line-through text-muted-foreground" : "text-white"} truncate`}>
+                                                                {item.ingredient_name}
+                                                            </span>
+                                                            {item.quantity && (
+                                                                <span className="text-sm text-primary font-medium shrink-0">
+                                                                    {item.quantity}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                        {item.recipes?.name && (
+                                                            <span className="text-xs text-muted-foreground/60">
+                                                                {item.recipes.name}
+                                                            </span>
+                                                        )}
+                                                    </div>
+
+                                                    {/* Delete Button */}
+                                                    <button
+                                                        onClick={() => handleDelete(item.id)}
+                                                        disabled={isPending}
+                                                        className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-red-400 transition-all cursor-pointer shrink-0"
+                                                    >
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </button>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </CardContent>
+                            )}
+                        </Card>
+                    );
+                })
             )}
 
             {/* Tip */}

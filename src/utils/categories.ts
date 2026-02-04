@@ -17,3 +17,13 @@ export function categorizeIngredient(ingredient: string): string {
     }
     return "Autres";
 }
+
+export function getCategoryInfo(ingredient: string): { name: string; emoji: string } {
+    const lower = ingredient.toLowerCase();
+    for (const cat of CATEGORIES) {
+        if (cat.keywords.some((kw) => lower.includes(kw))) {
+            return { name: cat.name, emoji: cat.emoji };
+        }
+    }
+    return { name: "Autres", emoji: "📦" };
+}

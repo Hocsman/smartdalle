@@ -36,8 +36,30 @@ export async function addToShoppingList(recipeId: string) {
         throw new Error("Aucun ingrédient à ajouter");
     }
 
+    // Fetch user's pantry items for auto-exclusion
+    const { data: pantryItems } = await supabase
+        .from("pantry_items")
+        .select("ingredient_name")
+        .eq("user_id", user.id);
+
+    const pantryNames = (pantryItems || []).map((p) => p.ingredient_name.toLowerCase());
+
+    // Filter out ingredients already in the pantry (fuzzy match)
+    const filteredIngredients = pantryNames.length > 0
+        ? ingredientsList.filter((ingredient) => {
+            const lower = ingredient.toLowerCase();
+            const nameOnly = lower.replace(/\d+\s*(?:g|kg|ml|l|cl|pièces?|tranches?)/gi, "").trim();
+            return !pantryNames.some((pantryName) =>
+                nameOnly.includes(pantryName) || pantryName.includes(nameOnly)
+            );
+        })
+        : ingredientsList;
+
+    const ingredientsToAdd = filteredIngredients.length > 0 ? filteredIngredients : ingredientsList;
+    const excludedCount = ingredientsList.length - ingredientsToAdd.length;
+
     // Create shopping items from ingredients
-    const shoppingItems = ingredientsList.map((ingredient) => {
+    const shoppingItems = ingredientsToAdd.map((ingredient) => {
         // Try to extract quantity from ingredient string (e.g., "Poulet 150g" -> quantity: "150g", name: "Poulet")
         const quantityMatch = ingredient.match(/(\d+\s*(?:g|kg|ml|L|cl|pièces?|tranches?)?)/i);
         const quantity = quantityMatch ? quantityMatch[1] : null;
@@ -65,7 +87,7 @@ export async function addToShoppingList(recipeId: string) {
     }
 
     revalidatePath("/shopping-list");
-    return { success: true, count: shoppingItems.length };
+    return { success: true, count: shoppingItems.length, excludedCount };
 }
 
 export async function toggleShoppingItem(itemId: string, isChecked: boolean) {
