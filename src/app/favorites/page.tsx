@@ -1,9 +1,10 @@
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
-import { RecipeCard } from "@/components/recipe-card";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Heart } from "lucide-react";
+import { FavoritesClient } from "./favorites-client";
+import { getCollections } from "@/app/actions/collections";
 
 export const dynamic = "force-dynamic";
 
@@ -18,6 +19,7 @@ type Recipe = {
     carbs: number;
     fat: number;
 };
+
 export default async function FavoritesPage() {
     const supabase = await createClient();
     const {
@@ -26,20 +28,43 @@ export default async function FavoritesPage() {
 
     if (!user) return redirect("/login");
 
-    const { data: favoritesData } = await supabase
-        .from("favorites")
-        .select("recipe_id, recipes(*)")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false });
+    // Fetch favorites and collections in parallel
+    const [favoritesResult, collections] = await Promise.all([
+        supabase
+            .from("favorites")
+            .select("recipe_id, recipes(*)")
+            .eq("user_id", user.id)
+            .order("created_at", { ascending: false }),
+        getCollections().catch(() => []),
+    ]);
 
     type FavoriteRow = {
         recipe_id: string;
         recipes: Recipe | null;
     };
 
-    const recipes = ((favoritesData || []) as unknown as FavoriteRow[])
+    const recipes = ((favoritesResult.data || []) as unknown as FavoriteRow[])
         .map((item) => item.recipes)
         .filter(Boolean) as Recipe[];
+
+    // Fetch collection recipes map
+    const collectionRecipeMap: Record<string, string[]> = {};
+
+    if (collections.length > 0) {
+        const { data: collectionRecipes } = await supabase
+            .from("collection_recipes")
+            .select("collection_id, recipe_id")
+            .in("collection_id", collections.map((c) => c.id));
+
+        if (collectionRecipes) {
+            for (const cr of collectionRecipes) {
+                if (!collectionRecipeMap[cr.collection_id]) {
+                    collectionRecipeMap[cr.collection_id] = [];
+                }
+                collectionRecipeMap[cr.collection_id].push(cr.recipe_id);
+            }
+        }
+    }
 
     return (
         <div className="min-h-screen gradient-bg p-6 md:p-10 pb-24 relative overflow-hidden">
@@ -53,30 +78,15 @@ export default async function FavoritesPage() {
                         </Button>
                     </Link>
                     <h1 className="text-2xl md:text-3xl font-bold text-white flex items-center gap-2">
-                        <Heart className="text-primary h-6 w-6" /> Mes Recettes Préférées ❤️
+                        <Heart className="text-primary h-6 w-6" /> Mes Favoris
                     </h1>
                 </header>
 
-                {recipes.length > 0 ? (
-                    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                        {recipes.map((recipe) => (
-                            <RecipeCard key={recipe.id} recipe={recipe} isFavorite />
-                        ))}
-                    </div>
-                ) : (
-                    <div className="text-center py-20 bg-card/20 rounded-xl border border-dashed border-input">
-                        <p className="text-muted-foreground">
-                            Pas encore de kiff ? Va générer des recettes !
-                        </p>
-                        <div className="mt-6">
-                            <Link href="/dashboard">
-                                <Button className="bg-primary text-black font-bold hover:bg-primary/90">
-                                    Aller au dashboard
-                                </Button>
-                            </Link>
-                        </div>
-                    </div>
-                )}
+                <FavoritesClient
+                    allRecipes={recipes}
+                    collections={collections}
+                    collectionRecipeMap={collectionRecipeMap}
+                />
             </div>
         </div>
     );

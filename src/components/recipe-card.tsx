@@ -3,6 +3,7 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Wallet } from "lucide-react";
 import Link from "next/link";
 import { FavoriteButton } from "@/components/favorite-button";
+import { CollectionButton } from "@/components/collection-picker";
 
 interface Recipe {
     id: string;
@@ -43,7 +44,10 @@ export function RecipeCard({ recipe, isFavorite = false }: RecipeCardProps) {
                         <Badge variant="secondary" className="font-bold shadow-sm backdrop-blur-md bg-black/50 text-white border-none">
                             {recipe.culture}
                         </Badge>
-                        <FavoriteButton recipeId={recipe.id} initialFavorite={isFavorite} size="sm" />
+                        <div className="flex items-center gap-1.5">
+                            <CollectionButton recipeId={recipe.id} />
+                            <FavoriteButton recipeId={recipe.id} initialFavorite={isFavorite} size="sm" />
+                        </div>
                     </div>
                 </div>
 
