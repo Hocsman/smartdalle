@@ -100,7 +100,7 @@ export default function Home() {
           </div>
           <div className="w-px h-12 bg-white/10 hidden sm:block" />
           <div className="space-y-1">
-            <p className="text-3xl font-black text-primary">4.99€</p>
+            <p className="text-3xl font-black text-primary">9,99€</p>
             <p className="text-sm text-muted-foreground">Pro / mois</p>
           </div>
           <div className="w-px h-12 bg-white/10 hidden sm:block" />
