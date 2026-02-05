@@ -59,8 +59,8 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                     <AvatarUpload userId={user.id} avatarUrl={profile?.avatar_url} />
                 </section>
 
-                {/* Quick Access — visible on mobile (these are hidden from dashboard header on small screens) */}
-                <section className="bg-card/40 border border-input rounded-2xl p-4 md:hidden">
+                {/* Quick Access */}
+                <section className="bg-card/40 border border-input rounded-2xl p-4">
                     <h2 className="text-sm font-bold text-muted-foreground uppercase mb-3">Raccourcis</h2>
                     <div className="grid grid-cols-2 gap-2">
                         <Link href="/history" className="flex items-center gap-3 p-3 rounded-xl bg-secondary/40 hover:bg-secondary/60 transition-colors">
