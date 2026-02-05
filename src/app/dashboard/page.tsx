@@ -99,16 +99,17 @@ export default async function DashboardPage() {
 
                         {/* Quick actions */}
                         <div className="flex items-center gap-2">
-                            <InstallPWAButton />
-                            <NotificationButton />
-
-                            {/* Secondary nav: Historique & Suivi */}
-                            <Link href="/history" className="h-10 w-10 rounded-full bg-card border border-input flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary transition-colors">
-                                <History className="h-4 w-4" />
-                            </Link>
-                            <Link href="/progress" className="h-10 w-10 rounded-full bg-card border border-input flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary transition-colors">
-                                <Scale className="h-4 w-4" />
-                            </Link>
+                            {/* Secondary icons — hidden on mobile, visible on desktop */}
+                            <div className="hidden md:flex items-center gap-2">
+                                <InstallPWAButton />
+                                <NotificationButton />
+                                <Link href="/history" className="h-10 w-10 rounded-full bg-card border border-input flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary transition-colors">
+                                    <History className="h-4 w-4" />
+                                </Link>
+                                <Link href="/progress" className="h-10 w-10 rounded-full bg-card border border-input flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary transition-colors">
+                                    <Scale className="h-4 w-4" />
+                                </Link>
+                            </div>
 
                             {/* CTA Premium - Only for free users */}
                             {!isPremium && (

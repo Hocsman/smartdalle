@@ -5,7 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
-import { ArrowLeft, User, Headphones } from "lucide-react";
+import { ArrowLeft, User, Headphones, History, Scale } from "lucide-react";
+import { NotificationButton } from "@/components/notification-settings";
+import { InstallPWAButton } from "@/components/install-pwa-guide";
 import { AvatarUpload } from "@/components/avatar-upload";
 import { ManageSubscriptionButton } from "@/components/ManageSubscriptionButton";
 import { SupportForm } from "@/components/support-form";
@@ -55,6 +57,25 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                 <section className="bg-card/40 border border-input rounded-2xl p-6 space-y-4">
                     <h2 className="text-lg font-bold text-white">Avatar</h2>
                     <AvatarUpload userId={user.id} avatarUrl={profile?.avatar_url} />
+                </section>
+
+                {/* Quick Access — visible on mobile (these are hidden from dashboard header on small screens) */}
+                <section className="bg-card/40 border border-input rounded-2xl p-4 md:hidden">
+                    <h2 className="text-sm font-bold text-muted-foreground uppercase mb-3">Raccourcis</h2>
+                    <div className="grid grid-cols-2 gap-2">
+                        <Link href="/history" className="flex items-center gap-3 p-3 rounded-xl bg-secondary/40 hover:bg-secondary/60 transition-colors">
+                            <History className="h-5 w-5 text-primary" />
+                            <span className="text-sm font-semibold text-white">Historique</span>
+                        </Link>
+                        <Link href="/progress" className="flex items-center gap-3 p-3 rounded-xl bg-secondary/40 hover:bg-secondary/60 transition-colors">
+                            <Scale className="h-5 w-5 text-primary" />
+                            <span className="text-sm font-semibold text-white">Suivi</span>
+                        </Link>
+                    </div>
+                    <div className="flex items-center gap-2 mt-3">
+                        <NotificationButton />
+                        <InstallPWAButton />
+                    </div>
                 </section>
 
                 <form action={updateProfile} className="space-y-6 bg-card/40 border border-input rounded-2xl p-6">
