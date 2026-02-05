@@ -311,6 +311,20 @@
   animation: float 10s ease-in-out infinite reverse;
 }
 
+/* Safe area for bottom navbar (iPhone notch) */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Hide scrollbar */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 /* Shimmer Text Effect */
 .shimmer-text {
   background: linear-gradient(90deg,

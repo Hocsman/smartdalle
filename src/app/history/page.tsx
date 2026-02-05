@@ -59,7 +59,7 @@ export default async function HistoryPage() {
     };
 
     return (
-        <div className="min-h-screen gradient-bg p-6 md:p-10 mb-20 relative overflow-hidden">
+        <div className="min-h-screen gradient-bg p-6 md:p-10 pb-24 relative overflow-hidden">
             {/* Background Grid */}
             <div className="absolute inset-0 bg-[linear-gradient(rgba(255,211,0,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,211,0,0.02)_1px,transparent_1px)] bg-[size:50px_50px] pointer-events-none" />
 
