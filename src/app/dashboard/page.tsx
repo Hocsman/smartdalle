@@ -3,15 +3,13 @@ import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { generatePlan } from "./actions";
 import { DailyPlanView } from "@/components/daily-plan-view";
-import { Sparkles, Crown, History, Scale } from "lucide-react";
+import { Sparkles, Crown } from "lucide-react";
 import Link from "next/link";
 import { AiGeneratorButton } from "@/components/ai-generator-button";
 import { DashboardRecipesClient } from "@/components/dashboard-recipes-client";
 import { getFavoriteIds } from "@/app/actions/favorites";
 import { getUserStreak } from "@/app/progress/actions";
-import { NotificationButton } from "@/components/notification-settings";
 import { GenerateButton } from "@/components/GenerateButton";
-import { InstallPWAButton } from "@/components/install-pwa-guide";
 
 export const dynamic = "force-dynamic";
 
@@ -89,65 +87,45 @@ export default async function DashboardPage() {
 
             <div className="max-w-7xl mx-auto space-y-6 relative z-10">
 
-                {/* Header Bar - Compact */}
-                <header className="flex flex-col gap-3">
-                    <div className="flex items-center justify-between">
-                        {/* Logo */}
+                {/* Header Bar - Minimal */}
+                <header className="flex items-center justify-between gap-4">
+                    {/* Logo + Go Pro */}
+                    <div className="flex items-center gap-3">
                         <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight uppercase italic shrink-0">
                             Smart<span className="text-primary">Dalle</span>
                         </h1>
-
-                        {/* Quick actions */}
-                        <div className="flex items-center gap-2">
-                            {/* Secondary icons — hidden on mobile, visible on desktop */}
-                            <div className="hidden md:flex items-center gap-2">
-                                <InstallPWAButton />
-                                <NotificationButton />
-                                <Link href="/history" className="h-10 w-10 rounded-full bg-card border border-input flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary transition-colors">
-                                    <History className="h-4 w-4" />
-                                </Link>
-                                <Link href="/progress" className="h-10 w-10 rounded-full bg-card border border-input flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary transition-colors">
-                                    <Scale className="h-4 w-4" />
-                                </Link>
-                            </div>
-
-                            {/* CTA Premium - Only for free users */}
-                            {!isPremium && (
-                                <Link href="/premium">
-                                    <Button size="sm" className="bg-gradient-to-r from-yellow-500 to-amber-600 text-black font-bold hover:from-yellow-400 hover:to-amber-500 shadow-lg shadow-yellow-500/25 animate-pulse hover:animate-none">
-                                        <Crown className="h-4 w-4 mr-1" />
-                                        <span className="text-xs">Pro</span>
-                                    </Button>
-                                </Link>
-                            )}
-                        </div>
+                        {!isPremium && (
+                            <Link href="/premium">
+                                <Button size="sm" className="bg-gradient-to-r from-yellow-500 to-amber-600 text-black font-bold hover:from-yellow-400 hover:to-amber-500 shadow-lg shadow-yellow-500/25">
+                                    <Crown className="h-4 w-4 mr-1" />
+                                    <span className="text-xs">Pro</span>
+                                </Button>
+                            </Link>
+                        )}
+                        {isPremium && (
+                            <span className="inline-flex items-center gap-1 bg-gradient-to-r from-yellow-500 to-amber-600 text-black text-xs font-black px-2 py-0.5 rounded-full">
+                                <Crown className="w-3 h-3" /> PRO
+                            </span>
+                        )}
                     </div>
 
-                    {/* Greeting + Actions Row */}
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                        <p className="text-muted-foreground text-base">
-                            Wesh <span className="text-white font-bold capitalize">{pseudo}</span>
-                            {isPremium && (
-                                <span className="inline-flex items-center gap-1 bg-gradient-to-r from-yellow-500 to-amber-600 text-black text-xs font-black px-2 py-0.5 rounded-full mx-2">
-                                    <Crown className="w-3 h-3" /> PRO
-                                </span>
-                            )}
-                            {!isPremium && <span>, </span>}
-                            voici ton fuel 🔥
-                        </p>
-
-                        <div className="flex items-center gap-2">
-                            {!dailyPlan && (
-                                <form action={generatePlan}>
-                                    <Button size="sm" className="bg-primary text-black font-bold hover:bg-primary/90 cursor-pointer">
-                                        <Sparkles className="mr-1.5 h-4 w-4" /> Mon Menu
-                                    </Button>
-                                </form>
-                            )}
-                            <AiGeneratorButton isPremium={isPremium} />
-                        </div>
+                    {/* CTA Buttons */}
+                    <div className="flex items-center gap-2">
+                        {!dailyPlan && (
+                            <form action={generatePlan}>
+                                <Button size="sm" className="bg-primary text-black font-bold hover:bg-primary/90 cursor-pointer">
+                                    <Sparkles className="mr-1.5 h-4 w-4" /> <span className="hidden sm:inline">Mon </span>Menu
+                                </Button>
+                            </form>
+                        )}
+                        <AiGeneratorButton isPremium={isPremium} />
                     </div>
                 </header>
+
+                {/* Greeting */}
+                <p className="text-muted-foreground text-base">
+                    Wesh <span className="text-white font-bold capitalize">{pseudo}</span>, voici ton fuel 🔥
+                </p>
 
                 <section>
                     <div className="flex items-center gap-2 mb-4">
