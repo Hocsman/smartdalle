@@ -194,25 +194,42 @@ export async function updateMealSlot(
 
     const slotColumn = `${slot}_recipe_id`;
 
-    // Check if plan exists
-    const { data: existingPlan } = await supabase
+    // Check if plan exists for this date
+    const { data: existingPlan, error: selectError } = await supabase
         .from("daily_plans")
         .select("id")
         .eq("user_id", user.id)
         .eq("date", date)
-        .single();
+        .maybeSingle();
+
+    if (selectError) {
+        console.error("Error checking existing plan:", selectError);
+        throw new Error("Failed to check existing plan");
+    }
 
     if (existingPlan) {
-        await supabase
+        // Update existing plan
+        const { error: updateError } = await supabase
             .from("daily_plans")
             .update({ [slotColumn]: recipeId })
             .eq("id", existingPlan.id);
+
+        if (updateError) {
+            console.error("Error updating plan:", updateError);
+            throw new Error("Failed to update meal slot");
+        }
     } else {
-        await supabase.from("daily_plans").insert({
+        // Create new plan for this date
+        const { error: insertError } = await supabase.from("daily_plans").insert({
             user_id: user.id,
             date,
             [slotColumn]: recipeId,
         });
+
+        if (insertError) {
+            console.error("Error inserting plan:", insertError);
+            throw new Error("Failed to create meal slot");
+        }
     }
 
     revalidatePath("/planning");

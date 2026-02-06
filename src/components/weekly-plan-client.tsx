@@ -113,10 +113,15 @@ export function WeeklyPlanClient({
         if (!selectedSlot) return;
 
         startTransition(async () => {
-            await updateMealSlot(selectedSlot.date, selectedSlot.slot as "breakfast" | "lunch" | "dinner" | "snack", recipeId);
-            const result = await getWeeklyPlans(weekOffset);
-            setPlans(result.plans);
-            setSelectedSlot(null);
+            try {
+                await updateMealSlot(selectedSlot.date, selectedSlot.slot as "breakfast" | "lunch" | "dinner" | "snack", recipeId);
+                const result = await getWeeklyPlans(weekOffset);
+                setPlans(result.plans);
+                setSelectedSlot(null);
+            } catch (error) {
+                console.error("Error adding meal:", error);
+                alert("Erreur lors de l'ajout du repas. Veuillez reessayer.");
+            }
         });
     };
 

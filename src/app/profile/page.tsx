@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
-import { ArrowLeft, User, Headphones, History, Scale } from "lucide-react";
+import { ArrowLeft, User, Headphones, History, Scale, Heart } from "lucide-react";
 import { NotificationButton } from "@/components/notification-settings";
 import { InstallPWAButton } from "@/components/install-pwa-guide";
 import { AvatarUpload } from "@/components/avatar-upload";
@@ -63,6 +63,10 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                 <section className="bg-card/40 border border-input rounded-2xl p-4">
                     <h2 className="text-sm font-bold text-muted-foreground uppercase mb-3">Raccourcis</h2>
                     <div className="grid grid-cols-2 gap-2">
+                        <Link href="/favorites" className="flex items-center gap-3 p-3 rounded-xl bg-secondary/40 hover:bg-secondary/60 transition-colors">
+                            <Heart className="h-5 w-5 text-red-400" />
+                            <span className="text-sm font-semibold text-white">Favoris</span>
+                        </Link>
                         <Link href="/history" className="flex items-center gap-3 p-3 rounded-xl bg-secondary/40 hover:bg-secondary/60 transition-colors">
                             <History className="h-5 w-5 text-primary" />
                             <span className="text-sm font-semibold text-white">Historique</span>
