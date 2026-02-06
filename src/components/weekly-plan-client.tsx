@@ -88,10 +88,16 @@ export function WeeklyPlanClient({
         setWeekOffset(newOffset);
 
         startTransition(async () => {
-            const result = await getWeeklyPlans(newOffset);
-            setPlans(result.plans);
-            setWeekStart(result.weekStart);
-            setWeekDates(result.weekDates);
+            try {
+                const result = await getWeeklyPlans(newOffset);
+                setPlans(result.plans);
+                setWeekStart(result.weekStart);
+                setWeekDates(result.weekDates);
+            } catch (error) {
+                console.error("Error navigating week:", error);
+                // Revert offset on error
+                setWeekOffset(weekOffset);
+            }
         });
     };
 
@@ -99,11 +105,11 @@ export function WeeklyPlanClient({
         setIsGenerating(true);
         try {
             await generateWeeklyPlan();
-            // Refresh data
             const result = await getWeeklyPlans(weekOffset);
             setPlans(result.plans);
         } catch (error) {
             console.error("Error generating weekly plan:", error);
+            alert("Erreur lors de la generation. Veuillez reessayer.");
         } finally {
             setIsGenerating(false);
         }
@@ -115,9 +121,9 @@ export function WeeklyPlanClient({
         startTransition(async () => {
             try {
                 await updateMealSlot(selectedSlot.date, selectedSlot.slot as "breakfast" | "lunch" | "dinner" | "snack", recipeId);
+                setSelectedSlot(null);
                 const result = await getWeeklyPlans(weekOffset);
                 setPlans(result.plans);
-                setSelectedSlot(null);
             } catch (error) {
                 console.error("Error adding meal:", error);
                 alert("Erreur lors de l'ajout du repas. Veuillez reessayer.");
@@ -127,9 +133,13 @@ export function WeeklyPlanClient({
 
     const handleRemoveMeal = async (date: string, slot: string) => {
         startTransition(async () => {
-            await updateMealSlot(date, slot as "breakfast" | "lunch" | "dinner" | "snack", null);
-            const result = await getWeeklyPlans(weekOffset);
-            setPlans(result.plans);
+            try {
+                await updateMealSlot(date, slot as "breakfast" | "lunch" | "dinner" | "snack", null);
+                const result = await getWeeklyPlans(weekOffset);
+                setPlans(result.plans);
+            } catch (error) {
+                console.error("Error removing meal:", error);
+            }
         });
     };
 
@@ -149,10 +159,15 @@ export function WeeklyPlanClient({
         }
 
         startTransition(async () => {
-            await swapMeals(draggedMeal.date, draggedMeal.slot, targetDate, targetSlot);
-            const result = await getWeeklyPlans(weekOffset);
-            setPlans(result.plans);
-            setDraggedMeal(null);
+            try {
+                await swapMeals(draggedMeal.date, draggedMeal.slot, targetDate, targetSlot);
+                setDraggedMeal(null);
+                const result = await getWeeklyPlans(weekOffset);
+                setPlans(result.plans);
+            } catch (error) {
+                console.error("Error swapping meals:", error);
+                setDraggedMeal(null);
+            }
         });
     };
 
@@ -200,10 +215,14 @@ export function WeeklyPlanClient({
                             onClick={() => {
                                 setWeekOffset(0);
                                 startTransition(async () => {
-                                    const result = await getWeeklyPlans(0);
-                                    setPlans(result.plans);
-                                    setWeekStart(result.weekStart);
-                                    setWeekDates(result.weekDates);
+                                    try {
+                                        const result = await getWeeklyPlans(0);
+                                        setPlans(result.plans);
+                                        setWeekStart(result.weekStart);
+                                        setWeekDates(result.weekDates);
+                                    } catch (error) {
+                                        console.error("Error returning to current week:", error);
+                                    }
                                 });
                             }}
                             disabled={weekOffset === 0 || isPending}

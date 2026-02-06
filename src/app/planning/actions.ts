@@ -76,10 +76,10 @@ export async function getWeeklyPlans(weekOffset: number = 0) {
         return {
             date,
             planId: plan?.id || null,
-            breakfast: plan?.breakfast_recipe_id ? recipes[plan.breakfast_recipe_id] : null,
-            lunch: plan?.lunch_recipe_id ? recipes[plan.lunch_recipe_id] : null,
-            dinner: plan?.dinner_recipe_id ? recipes[plan.dinner_recipe_id] : null,
-            snack: plan?.snack_recipe_id ? recipes[plan.snack_recipe_id] : null,
+            breakfast: plan?.breakfast_recipe_id ? (recipes[plan.breakfast_recipe_id] ?? null) : null,
+            lunch: plan?.lunch_recipe_id ? (recipes[plan.lunch_recipe_id] ?? null) : null,
+            dinner: plan?.dinner_recipe_id ? (recipes[plan.dinner_recipe_id] ?? null) : null,
+            snack: plan?.snack_recipe_id ? (recipes[plan.snack_recipe_id] ?? null) : null,
         };
     });
 
@@ -154,7 +154,7 @@ export async function generateWeeklyPlan() {
             .select("id")
             .eq("user_id", user.id)
             .eq("date", date)
-            .single();
+            .maybeSingle();
 
         if (existingPlan) {
             await supabase
