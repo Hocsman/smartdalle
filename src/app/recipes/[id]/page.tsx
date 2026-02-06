@@ -8,6 +8,7 @@ import { AiGeneratorButton } from "@/components/ai-generator-button";
 import { RecipeTabsSection } from "./recipe-tabs-section";
 import { FavoriteButton } from "@/components/favorite-button";
 import { LogMealButton } from "@/components/log-meal-button";
+import { ShareRecipeButton } from "@/components/share-recipe-button";
 
 interface RecipePageProps {
     params: Promise<{
@@ -91,8 +92,19 @@ export default async function RecipePage({ params }: RecipePageProps) {
                     </Button>
                 </Link>
 
-                {/* AI Generator Button (Top Right) */}
-                <div className="absolute top-6 right-6 z-20 flex gap-3">
+                {/* Action Buttons (Top Right) */}
+                <div className="absolute top-6 right-6 z-20 flex gap-2">
+                    <ShareRecipeButton
+                        recipe={{
+                            id: recipe.id,
+                            name: recipe.name,
+                            culture: recipe.culture,
+                            calories: recipe.calories,
+                            protein: recipe.protein,
+                            price_estimated: recipe.price_estimated,
+                            image_url: recipe.image_url,
+                        }}
+                    />
                     <AiGeneratorButton
                         recipeId={recipe.id}
                         recipeName={recipe.name}

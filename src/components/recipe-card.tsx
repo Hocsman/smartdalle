@@ -4,6 +4,7 @@ import { Wallet } from "lucide-react";
 import Link from "next/link";
 import { FavoriteButton } from "@/components/favorite-button";
 import { CollectionButton } from "@/components/collection-picker";
+import { ShareRecipeMini } from "@/components/share-recipe-mini";
 
 interface Recipe {
     id: string;
@@ -45,6 +46,7 @@ export function RecipeCard({ recipe, isFavorite = false }: RecipeCardProps) {
                             {recipe.culture}
                         </Badge>
                         <div className="flex items-center gap-1.5">
+                            <ShareRecipeMini recipeId={recipe.id} recipeName={recipe.name} />
                             <CollectionButton recipeId={recipe.id} />
                             <FavoriteButton recipeId={recipe.id} initialFavorite={isFavorite} size="sm" />
                         </div>
