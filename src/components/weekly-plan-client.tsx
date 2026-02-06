@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
     ChevronLeft,
@@ -60,6 +61,7 @@ export function WeeklyPlanClient({
     allRecipes,
     isPremium,
 }: WeeklyPlanClientProps) {
+    const router = useRouter();
     const [plans, setPlans] = useState<DayPlan[]>(initialPlans);
     const [weekStart, setWeekStart] = useState(initialWeekStart);
     const [weekDates, setWeekDates] = useState(initialWeekDates);
@@ -68,6 +70,15 @@ export function WeeklyPlanClient({
     const [isGenerating, setIsGenerating] = useState(false);
     const [selectedSlot, setSelectedSlot] = useState<{ date: string; slot: string } | null>(null);
     const [draggedMeal, setDraggedMeal] = useState<{ date: string; slot: string; recipe: Recipe } | null>(null);
+
+    // Sync state when props change (after router.refresh())
+    useEffect(() => {
+        if (weekOffset === 0) {
+            setPlans(initialPlans);
+            setWeekStart(initialWeekStart);
+            setWeekDates(initialWeekDates);
+        }
+    }, [initialPlans, initialWeekStart, initialWeekDates, weekOffset]);
 
     // Calculate week totals
     const weekTotals = plans.reduce(
@@ -101,12 +112,26 @@ export function WeeklyPlanClient({
         });
     };
 
+    const refreshData = async () => {
+        if (weekOffset === 0) {
+            // For current week, use router.refresh() which will update initialPlans
+            router.refresh();
+        } else {
+            // For other weeks, fetch manually
+            try {
+                const result = await getWeeklyPlans(weekOffset);
+                setPlans(result.plans);
+            } catch (error) {
+                console.error("Error refreshing data:", error);
+            }
+        }
+    };
+
     const handleGenerate = async () => {
         setIsGenerating(true);
         try {
             await generateWeeklyPlan();
-            const result = await getWeeklyPlans(weekOffset);
-            setPlans(result.plans);
+            await refreshData();
         } catch (error) {
             console.error("Error generating weekly plan:", error);
             alert("Erreur lors de la generation. Veuillez reessayer.");
@@ -118,12 +143,11 @@ export function WeeklyPlanClient({
     const handleSelectRecipe = async (recipeId: string) => {
         if (!selectedSlot) return;
 
+        setSelectedSlot(null);
         startTransition(async () => {
             try {
                 await updateMealSlot(selectedSlot.date, selectedSlot.slot as "breakfast" | "lunch" | "dinner" | "snack", recipeId);
-                setSelectedSlot(null);
-                const result = await getWeeklyPlans(weekOffset);
-                setPlans(result.plans);
+                await refreshData();
             } catch (error) {
                 console.error("Error adding meal:", error);
                 alert("Erreur lors de l'ajout du repas. Veuillez reessayer.");
@@ -135,8 +159,7 @@ export function WeeklyPlanClient({
         startTransition(async () => {
             try {
                 await updateMealSlot(date, slot as "breakfast" | "lunch" | "dinner" | "snack", null);
-                const result = await getWeeklyPlans(weekOffset);
-                setPlans(result.plans);
+                await refreshData();
             } catch (error) {
                 console.error("Error removing meal:", error);
             }
@@ -158,15 +181,14 @@ export function WeeklyPlanClient({
             return;
         }
 
+        const meal = draggedMeal;
+        setDraggedMeal(null);
         startTransition(async () => {
             try {
-                await swapMeals(draggedMeal.date, draggedMeal.slot, targetDate, targetSlot);
-                setDraggedMeal(null);
-                const result = await getWeeklyPlans(weekOffset);
-                setPlans(result.plans);
+                await swapMeals(meal.date, meal.slot, targetDate, targetSlot);
+                await refreshData();
             } catch (error) {
                 console.error("Error swapping meals:", error);
-                setDraggedMeal(null);
             }
         });
     };
