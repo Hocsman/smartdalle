@@ -47,6 +47,11 @@ export default async function PlanningPage() {
             .eq("id", user.id)
             .maybeSingle();
 
+        // If no profile exists, redirect to onboarding
+        if (!profile) {
+            return redirect("/onboarding");
+        }
+
         const isPremium = profile?.is_premium === true;
 
         // Calculate week dates

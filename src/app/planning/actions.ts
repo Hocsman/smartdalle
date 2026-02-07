@@ -104,9 +104,14 @@ export async function generateWeeklyPlan() {
     // Get user profile for budget (use maybeSingle to avoid errors)
     const { data: profile } = await supabase
         .from("profiles")
-        .select("budget_level")
+        .select("id, budget_level")
         .eq("id", user.id)
         .maybeSingle();
+
+    // Check if user has a profile (required for foreign key constraint)
+    if (!profile) {
+        throw new Error("Profile not found. Please complete onboarding first.");
+    }
 
     const isEco = profile?.budget_level === "eco";
 
@@ -197,6 +202,17 @@ export async function updateMealSlot(
 
     if (!user) throw new Error("Unauthorized");
 
+    // Check if user has a profile (required for foreign key constraint)
+    const { data: profile } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("id", user.id)
+        .maybeSingle();
+
+    if (!profile) {
+        throw new Error("Profile not found. Please complete onboarding first.");
+    }
+
     const slotColumn = `${slot}_recipe_id`;
 
     // Check if plan exists for this date
@@ -251,6 +267,17 @@ export async function swapMeals(
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) throw new Error("Unauthorized");
+
+    // Check if user has a profile (required for foreign key constraint)
+    const { data: profile } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("id", user.id)
+        .maybeSingle();
+
+    if (!profile) {
+        throw new Error("Profile not found. Please complete onboarding first.");
+    }
 
     // Get both plans
     const { data: plans } = await supabase
