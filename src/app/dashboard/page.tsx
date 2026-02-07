@@ -10,6 +10,7 @@ import { DashboardRecipesClient } from "@/components/dashboard-recipes-client";
 import { getFavoriteIds } from "@/app/actions/favorites";
 import { getUserStreak } from "@/app/progress/actions";
 import { GenerateButton } from "@/components/GenerateButton";
+import { InstallPWAButton } from "@/components/install-pwa-guide";
 
 export const dynamic = "force-dynamic";
 
@@ -89,11 +90,12 @@ export default async function DashboardPage() {
 
                 {/* Header Bar - Minimal */}
                 <header className="flex items-center justify-between gap-4">
-                    {/* Logo + Go Pro */}
+                    {/* Logo + Install + Go Pro */}
                     <div className="flex items-center gap-3">
                         <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight uppercase italic shrink-0">
                             Smart<span className="text-primary">Dalle</span>
                         </h1>
+                        <InstallPWAButton />
                         {!isPremium && (
                             <Link href="/premium">
                                 <Button size="sm" className="bg-gradient-to-r from-yellow-500 to-amber-600 text-black font-bold hover:from-yellow-400 hover:to-amber-500 shadow-lg shadow-yellow-500/25">

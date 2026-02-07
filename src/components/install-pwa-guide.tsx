@@ -164,10 +164,10 @@ function Step({ number, icon, title, description }: {
     );
 }
 
-// Header button
+// Header button - shows on all devices, hides when installed (standalone mode)
 export function InstallPWAButton() {
     const [showGuide, setShowGuide] = useState(false);
-    const [isInstalled, setIsInstalled] = useState(false);
+    const [isInstalled, setIsInstalled] = useState(true); // Default to true to prevent flash
 
     useEffect(() => {
         setIsInstalled(isStandalone());
@@ -189,11 +189,11 @@ export function InstallPWAButton() {
     return (
         <button
             onClick={() => setShowGuide(true)}
-            className="flex flex-col items-center bg-card border border-input p-2 rounded-lg cursor-pointer hover:border-primary transition-colors min-w-[60px]"
+            className="flex items-center gap-1.5 bg-card/80 border border-primary/50 px-2.5 py-1.5 rounded-lg cursor-pointer hover:bg-primary/20 hover:border-primary transition-colors"
             title="Installer l'app"
         >
-            <Download className="h-5 w-5 text-primary" />
-            <span className="text-[10px] uppercase font-bold text-muted-foreground">Installer</span>
+            <Download className="h-4 w-4 text-primary" />
+            <span className="text-xs font-bold text-primary">Installer</span>
         </button>
     );
 }

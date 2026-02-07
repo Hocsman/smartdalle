@@ -7,7 +7,6 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { ArrowLeft, User, Headphones, History, Scale, Heart } from "lucide-react";
 import { NotificationButton } from "@/components/notification-settings";
-import { InstallPWAButton } from "@/components/install-pwa-guide";
 import { AvatarUpload } from "@/components/avatar-upload";
 import { ManageSubscriptionButton } from "@/components/ManageSubscriptionButton";
 import { SupportForm } from "@/components/support-form";
@@ -76,9 +75,8 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                             <span className="text-sm font-semibold text-white">Suivi</span>
                         </Link>
                     </div>
-                    <div className="flex items-center gap-2 mt-3">
+                    <div className="mt-3">
                         <NotificationButton />
-                        <InstallPWAButton />
                     </div>
                 </section>
 
