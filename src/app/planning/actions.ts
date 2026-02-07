@@ -8,12 +8,17 @@ function getWeekStart(date: Date): Date {
     const d = new Date(date);
     const day = d.getDay();
     const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Adjust for Sunday
-    return new Date(d.setDate(diff));
+    d.setDate(diff);
+    d.setHours(0, 0, 0, 0);
+    return d;
 }
 
-// Format date as YYYY-MM-DD
+// Format date as YYYY-MM-DD (local timezone to avoid UTC issues)
 function formatDate(date: Date): string {
-    return date.toISOString().split("T")[0];
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
 }
 
 // Get array of 7 dates starting from Monday
@@ -96,12 +101,12 @@ export async function generateWeeklyPlan() {
 
     if (!user) throw new Error("Unauthorized");
 
-    // Get user profile for budget
+    // Get user profile for budget (use maybeSingle to avoid errors)
     const { data: profile } = await supabase
         .from("profiles")
         .select("budget_level")
         .eq("id", user.id)
-        .single();
+        .maybeSingle();
 
     const isEco = profile?.budget_level === "eco";
 
