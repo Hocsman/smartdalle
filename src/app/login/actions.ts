@@ -18,12 +18,20 @@ export async function login(formData: FormData) {
         error = signInError;
     } catch (e) {
         console.error("Unexpected login error:", e);
-        return redirect("/login?error=Server error");
+        return redirect("/login?error=server");
     }
 
     if (error) {
         console.error("Login error:", error);
-        return redirect("/login?error=Could not authenticate user");
+        // Check if email is not confirmed
+        if (error.message?.toLowerCase().includes("email not confirmed")) {
+            return redirect("/login?error=email_not_confirmed");
+        }
+        // Check for invalid credentials
+        if (error.message?.toLowerCase().includes("invalid login credentials")) {
+            return redirect("/login?error=invalid_credentials");
+        }
+        return redirect("/login?error=auth_failed");
     }
 
     revalidatePath("/", "layout");
@@ -44,14 +52,18 @@ export async function signup(formData: FormData) {
         error = signUpError;
     } catch (e) {
         console.error("Unexpected signup error:", e);
-        return redirect("/login?error=Server error");
+        return redirect("/login?error=server");
     }
 
     if (error) {
         console.error("Signup error:", error);
-        return redirect("/login?error=Could not authenticate user");
+        // Check if user already exists
+        if (error.message?.toLowerCase().includes("already registered")) {
+            return redirect("/login?error=already_registered");
+        }
+        return redirect("/login?error=signup_failed");
     }
 
-    revalidatePath("/", "layout");
-    redirect("/onboarding");
+    // Redirect with success message to confirm email
+    redirect("/login?success=signup");
 }

@@ -1,19 +1,55 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { login, signup } from "./actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { LogIn, UserPlus, Sparkles, Eye, EyeOff } from "lucide-react";
+import { LogIn, UserPlus, Sparkles, Eye, EyeOff, Mail, AlertCircle, CheckCircle, Loader2 } from "lucide-react";
 import Link from "next/link";
 
 type Mode = "login" | "signup";
 
 const REMEMBER_EMAIL_KEY = "smartdalle_remember_email";
 
+// Error and success messages
+const ERROR_MESSAGES: Record<string, string> = {
+    email_not_confirmed: "Tu dois d'abord confirmer ton email. Vérifie ta boîte mail (et les spams).",
+    invalid_credentials: "Email ou mot de passe incorrect.",
+    already_registered: "Cet email est déjà utilisé. Connecte-toi ou utilise un autre email.",
+    auth_failed: "Erreur d'authentification. Réessaie.",
+    signup_failed: "Erreur lors de l'inscription. Réessaie.",
+    server: "Erreur serveur. Réessaie plus tard.",
+};
+
+const SUCCESS_MESSAGES: Record<string, { title: string; message: string }> = {
+    signup: {
+        title: "Inscription réussie !",
+        message: "Un email de confirmation t'a été envoyé. Clique sur le lien pour activer ton compte.",
+    },
+};
+
+// Wrapper component to handle Suspense for useSearchParams
 export default function LoginPage() {
+    return (
+        <Suspense fallback={<LoginPageSkeleton />}>
+            <LoginPageContent />
+        </Suspense>
+    );
+}
+
+function LoginPageSkeleton() {
+    return (
+        <div className="flex min-h-screen items-center justify-center gradient-bg">
+            <Loader2 className="w-8 h-8 text-primary animate-spin" />
+        </div>
+    );
+}
+
+function LoginPageContent() {
+    const searchParams = useSearchParams();
     const [mode, setMode] = useState<Mode>("login");
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -23,6 +59,12 @@ export default function LoginPage() {
     const [confirmPassword, setConfirmPassword] = useState("");
     const [acceptTerms, setAcceptTerms] = useState(false);
     const [errors, setErrors] = useState<{ password?: string; terms?: string }>({});
+
+    // Get error/success from URL params
+    const errorCode = searchParams.get("error");
+    const successCode = searchParams.get("success");
+    const errorMessage = errorCode ? ERROR_MESSAGES[errorCode] || "Une erreur est survenue." : null;
+    const successInfo = successCode ? SUCCESS_MESSAGES[successCode] : null;
 
     // Load remembered email on mount
     useEffect(() => {
@@ -112,7 +154,7 @@ export default function LoginPage() {
                     </div>
 
                     {/* Tabs */}
-                    <div className="flex gap-2 mb-8 bg-secondary/50 p-1 rounded-xl">
+                    <div className="flex gap-2 mb-6 bg-secondary/50 p-1 rounded-xl">
                         <button
                             type="button"
                             onClick={() => { setMode("login"); setErrors({}); }}
@@ -136,6 +178,50 @@ export default function LoginPage() {
                             Inscription
                         </button>
                     </div>
+
+                    {/* Success Message (after signup) */}
+                    {successInfo && (
+                        <div className="mb-6 p-4 rounded-xl bg-green-500/10 border border-green-500/30">
+                            <div className="flex items-start gap-3">
+                                <div className="p-2 rounded-full bg-green-500/20">
+                                    <Mail className="w-5 h-5 text-green-400" />
+                                </div>
+                                <div>
+                                    <p className="font-bold text-green-400 flex items-center gap-2">
+                                        <CheckCircle className="w-4 h-4" />
+                                        {successInfo.title}
+                                    </p>
+                                    <p className="text-sm text-green-300/80 mt-1">
+                                        {successInfo.message}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Error Message */}
+                    {errorMessage && (
+                        <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/30">
+                            <div className="flex items-start gap-3">
+                                <AlertCircle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
+                                <p className="text-sm text-red-300">
+                                    {errorMessage}
+                                    {errorCode === "email_not_confirmed" && (
+                                        <span className="block mt-2 text-xs text-red-300/70">
+                                            Pas reçu ? Vérifie tes spams ou{" "}
+                                            <button
+                                                type="button"
+                                                className="text-primary underline cursor-pointer"
+                                                onClick={() => setMode("signup")}
+                                            >
+                                                réinscris-toi
+                                            </button>
+                                        </span>
+                                    )}
+                                </p>
+                            </div>
+                        </div>
+                    )}
 
                     {/* Form */}
                     <form action={handleSubmit} className="space-y-5">
