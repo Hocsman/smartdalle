@@ -1,21 +1,31 @@
 import { NextRequest, NextResponse } from "next/server";
 import * as webpush from "web-push";
-import { createClient } from "@supabase/supabase-js";
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
 
-// Configuration VAPID
-const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!;
-const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY!;
-const vapidSubject = process.env.VAPID_SUBJECT || "mailto:support@smartdalle.fr";
-
-if (vapidPublicKey && vapidPrivateKey) {
-    webpush.setVapidDetails(vapidSubject, vapidPublicKey, vapidPrivateKey);
+// Configuration VAPID (lazy)
+let vapidConfigured = false;
+function ensureVapidConfigured() {
+    if (vapidConfigured) return;
+    const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+    const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY;
+    const vapidSubject = process.env.VAPID_SUBJECT || "mailto:support@smartdalle.fr";
+    if (vapidPublicKey && vapidPrivateKey) {
+        webpush.setVapidDetails(vapidSubject, vapidPublicKey, vapidPrivateKey);
+        vapidConfigured = true;
+    }
 }
 
-// Client Supabase admin (bypass RLS)
-const supabaseAdmin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+// Client Supabase admin (lazy initialization)
+let _supabaseAdmin: SupabaseClient | null = null;
+function getSupabaseAdmin(): SupabaseClient {
+    if (!_supabaseAdmin) {
+        _supabaseAdmin = createClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.SUPABASE_SERVICE_ROLE_KEY!
+        );
+    }
+    return _supabaseAdmin;
+}
 
 // Vérifier que la requête vient de Vercel Cron
 function isValidCronRequest(request: NextRequest): boolean {
@@ -35,6 +45,7 @@ async function sendPush(
     subscription: { endpoint: string; p256dh: string; auth: string },
     payload: { title: string; body: string; url?: string; tag?: string }
 ) {
+    ensureVapidConfigured();
     try {
         await webpush.sendNotification(
             {
@@ -58,7 +69,7 @@ async function sendPush(
         const err = error as { statusCode?: number };
         // Subscription expirée - la supprimer
         if (err.statusCode === 410 || err.statusCode === 404) {
-            await supabaseAdmin
+            await getSupabaseAdmin()
                 .from("push_subscriptions")
                 .delete()
                 .eq("endpoint", subscription.endpoint);
@@ -87,7 +98,7 @@ async function processMealReminders() {
 
     for (const meal of mealTypes) {
         // Trouver les users dont l'heure de repas = maintenant
-        const { data: subscriptions } = await supabaseAdmin
+        const { data: subscriptions } = await getSupabaseAdmin()
             .from("push_subscriptions")
             .select("endpoint, p256dh, auth, user_id")
             .eq("notify_meals", true)
@@ -108,7 +119,7 @@ async function processMealReminders() {
             dinner_recipe_id: string | null;
         }
 
-        const { data: dailyPlans } = await supabaseAdmin
+        const { data: dailyPlans } = await getSupabaseAdmin()
             .from("daily_plans")
             .select("user_id, breakfast_recipe_id, lunch_recipe_id, snack_recipe_id, dinner_recipe_id")
             .in("user_id", userIds)
@@ -136,7 +147,7 @@ async function processMealReminders() {
         // Récupérer les noms des recettes
         let recipeNames = new Map<string, string>();
         if (recipeIds.length > 0) {
-            const { data: recipes } = await supabaseAdmin
+            const { data: recipes } = await getSupabaseAdmin()
                 .from("recipes")
                 .select("id, name")
                 .in("id", recipeIds);
@@ -177,7 +188,7 @@ async function processExpiryReminders() {
         .split("T")[0];
 
     // Trouver les ingrédients qui expirent bientôt, groupés par user
-    const { data: expiringItems } = await supabaseAdmin
+    const { data: expiringItems } = await getSupabaseAdmin()
         .from("pantry_items")
         .select("user_id, ingredient_name, expiry_date")
         .lte("expiry_date", inTwoDays)
@@ -200,7 +211,7 @@ async function processExpiryReminders() {
 
     for (const [userId, items] of Array.from(itemsByUser)) {
         // Récupérer les subscriptions de cet utilisateur
-        const { data: subscriptions } = await supabaseAdmin
+        const { data: subscriptions } = await getSupabaseAdmin()
             .from("push_subscriptions")
             .select("endpoint, p256dh, auth")
             .eq("user_id", userId);
@@ -240,7 +251,7 @@ async function processStreakReminders() {
     const today = new Date().toISOString().split("T")[0];
 
     // Trouver les utilisateurs qui n'ont pas encore tracké aujourd'hui
-    const { data: subscriptions } = await supabaseAdmin
+    const { data: subscriptions } = await getSupabaseAdmin()
         .from("push_subscriptions")
         .select("endpoint, p256dh, auth, user_id")
         .eq("notify_streak", true);
@@ -253,7 +264,7 @@ async function processStreakReminders() {
 
     for (const sub of subscriptions) {
         // Vérifier si l'utilisateur a tracké aujourd'hui
-        const { data: todayLogs } = await supabaseAdmin
+        const { data: todayLogs } = await getSupabaseAdmin()
             .from("nutrition_logs")
             .select("id")
             .eq("user_id", sub.user_id)
@@ -264,7 +275,7 @@ async function processStreakReminders() {
         if (todayLogs && todayLogs.length > 0) continue;
 
         // Calculer le streak actuel
-        const { data: recentLogs } = await supabaseAdmin
+        const { data: recentLogs } = await getSupabaseAdmin()
             .from("nutrition_logs")
             .select("date")
             .eq("user_id", sub.user_id)
