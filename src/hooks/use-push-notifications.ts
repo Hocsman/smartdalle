@@ -43,17 +43,27 @@ export function usePushNotifications() {
         checkSupport();
     }, []);
 
-    // Get existing subscription
+    // Get existing subscription with timeout
     useEffect(() => {
         const getSubscription = async () => {
             if (!isSupported) return;
 
             try {
-                const registration = await navigator.serviceWorker.ready;
+                // Timeout de 5s pour éviter le blocage infini si le SW n'est pas prêt
+                const timeoutPromise = new Promise<null>((_, reject) =>
+                    setTimeout(() => reject(new Error("SW timeout")), 5000)
+                );
+
+                const registration = await Promise.race([
+                    navigator.serviceWorker.ready,
+                    timeoutPromise
+                ]) as ServiceWorkerRegistration;
+
                 const existingSub = await registration.pushManager.getSubscription();
                 setSubscription(existingSub);
-            } catch {
-                console.error("Error getting subscription");
+            } catch (err) {
+                console.error("Error getting subscription:", err);
+                setError("Service Worker non disponible. Recharge la page.");
             }
         };
 
@@ -80,8 +90,15 @@ export function usePushNotifications() {
                 return false;
             }
 
-            // Get service worker registration
-            const registration = await navigator.serviceWorker.ready;
+            // Get service worker registration avec timeout
+            const timeoutPromise = new Promise<null>((_, reject) =>
+                setTimeout(() => reject(new Error("SW timeout")), 5000)
+            );
+
+            const registration = await Promise.race([
+                navigator.serviceWorker.ready,
+                timeoutPromise
+            ]) as ServiceWorkerRegistration;
 
             // Subscribe to push
             const newSubscription = await registration.pushManager.subscribe({
@@ -104,7 +121,10 @@ export function usePushNotifications() {
             return true;
         } catch (err) {
             console.error("Error subscribing:", err);
-            setError("Erreur lors de l'abonnement");
+            const message = err instanceof Error && err.message === "SW timeout"
+                ? "Service Worker non disponible. Recharge la page."
+                : "Erreur lors de l'abonnement";
+            setError(message);
             return false;
         } finally {
             setIsLoading(false);
