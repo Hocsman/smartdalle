@@ -2,6 +2,7 @@
 
 import { createClient } from "@/utils/supabase/server";
 import { getOpenAIClient } from "@/lib/openai";
+import { checkRateLimit, incrementRateLimit, formatRateLimitError } from "@/lib/rate-limit";
 
 export interface SuggestedRecipe {
     name: string;
@@ -15,6 +16,7 @@ export interface SuggestedRecipe {
 
 export async function suggestAntiWasteRecipes(): Promise<
     | { error: "premium_required" }
+    | { error: "rate_limit"; message: string }
     | { error: "no_items" }
     | { suggestions: SuggestedRecipe[] }
 > {
@@ -32,6 +34,12 @@ export async function suggestAntiWasteRecipes(): Promise<
 
     if (!profile?.is_premium) {
         return { error: "premium_required" };
+    }
+
+    // Rate limit check
+    const rateLimit = await checkRateLimit(supabase, user.id, 'anti_waste', true);
+    if (!rateLimit.allowed) {
+        return { error: "rate_limit", message: formatRateLimitError(rateLimit.resetAt) };
     }
 
     // Fetch pantry items, prioritize by expiry
@@ -101,6 +109,9 @@ Retourne un JSON valide avec cette structure exacte :
 
     const content = completion.choices[0].message.content;
     if (!content) throw new Error("Pas de réponse IA");
+
+    // Increment rate limit après succès
+    await incrementRateLimit(supabase, user.id, 'anti_waste');
 
     const parsed = JSON.parse(content);
     return { suggestions: parsed.suggestions };

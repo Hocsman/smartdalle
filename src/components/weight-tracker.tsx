@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { logWeight } from "@/app/actions/progress";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Loader2, TrendingDown, TrendingUp, Minus, Target, Scale, Flame, Trophy, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
 interface WeightLog {
     id?: string;
@@ -55,7 +56,7 @@ export default function WeightTracker({ logs, targetWeight }: WeightTrackerProps
             await logWeight(parseFloat(weight));
             setWeight("");
         } catch (e) {
-            alert("Erreur lors de la sauvegarde.");
+            toast.error("Erreur lors de la sauvegarde.");
         } finally {
             setLoading(false);
         }

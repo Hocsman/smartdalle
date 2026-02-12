@@ -2,6 +2,7 @@
 
 import { createClient } from "@/utils/supabase/server";
 import { getOpenAIClient } from "@/lib/openai";
+import { checkRateLimit, incrementRateLimit, formatRateLimitError } from "@/lib/rate-limit";
 
 export type GeneratedRecipe = {
     id: string;
@@ -20,6 +21,7 @@ export type GeneratedRecipe = {
 
 export type GenerateRecipeResult =
     | { error: "premium_required" }
+    | { error: "rate_limit"; message: string }
     | { recipe: GeneratedRecipe };
 
 type AiResponse = {
@@ -56,6 +58,12 @@ export async function generateRecipe(): Promise<GenerateRecipeResult> {
 
     if (!profile?.is_premium) {
         return { error: "premium_required" };
+    }
+
+    // Rate limit check
+    const rateLimit = await checkRateLimit(supabase, user.id, 'recipe_generation', true);
+    if (!rateLimit.allowed) {
+        return { error: "rate_limit", message: formatRateLimitError(rateLimit.resetAt) };
     }
 
     const budget =
@@ -149,6 +157,9 @@ Ton : Motivant, tutoiement, style urbain.`;
         console.error("DB insert error:", error);
         throw new Error("DB_INSERT_FAILED");
     }
+
+    // Increment rate limit après succès
+    await incrementRateLimit(supabase, user.id, 'recipe_generation');
 
     return {
         recipe: {

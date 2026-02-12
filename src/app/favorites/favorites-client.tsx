@@ -8,6 +8,7 @@ import {
     FolderPlus, Plus, Loader2, Trash2, X,
 } from "lucide-react";
 import { Collection, createCollection, deleteCollection } from "@/app/actions/collections";
+import { toast } from "sonner";
 
 const EMOJI_OPTIONS = ["📁", "🍽️", "⚡", "🥗", "🏋️", "🎉", "🔥", "💪", "🌮", "🍕", "🥑", "🍜"];
 
@@ -58,7 +59,7 @@ export function FavoritesClient({
             setShowCreate(false);
         } catch (error) {
             const err = error as Error;
-            alert(err.message);
+            toast.error(err.message || "Erreur");
         } finally {
             setIsCreating(false);
         }

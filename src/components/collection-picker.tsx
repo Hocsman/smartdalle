@@ -14,6 +14,7 @@ import {
     removeFromCollection,
     Collection,
 } from "@/app/actions/collections";
+import { toast } from "sonner";
 
 const EMOJI_OPTIONS = ["📁", "🍽️", "⚡", "🥗", "🏋️", "🎉", "🔥", "💪", "🌮", "🍕", "🥑", "🍜"];
 
@@ -67,7 +68,7 @@ export function CollectionPicker({ recipeId, onClose }: CollectionPickerProps) {
             setNewEmoji("📁");
         } catch (error) {
             const err = error as Error;
-            alert(err.message || "Erreur");
+            toast.error(err.message || "Erreur");
         } finally {
             setIsCreating(false);
         }

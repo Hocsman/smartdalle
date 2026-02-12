@@ -2,6 +2,7 @@
 
 import { createClient } from "@/utils/supabase/server";
 import { getOpenAIClient } from "@/lib/openai";
+import { checkRateLimit, incrementRateLimit, formatRateLimitError, RateLimitError } from "@/lib/rate-limit";
 
 export async function generateAiRecipe() {
     const openai = getOpenAIClient();
@@ -23,6 +24,12 @@ export async function generateAiRecipe() {
     // Premium Guard
     if (!profile?.is_premium) {
         throw new Error("PREMIUM_REQUIRED");
+    }
+
+    // Rate limit check
+    const rateLimit = await checkRateLimit(supabase, user.id, 'recipe_generation', true);
+    if (!rateLimit.allowed) {
+        throw new RateLimitError(formatRateLimitError(rateLimit.resetAt), rateLimit.remaining, rateLimit.resetAt);
     }
 
     const budgetState = profile?.budget_level === 'eco' ? 'très économique (moins de 3 euros)' : 'standard';
@@ -106,6 +113,9 @@ export async function generateAiRecipe() {
             console.error("DB Error:", error);
             throw new Error("Failed to save recipe");
         }
+
+        // Increment rate limit après succès
+        await incrementRateLimit(supabase, user.id, 'recipe_generation');
 
         // Return the ID to redirect the user
         return insertedRecipe.id;

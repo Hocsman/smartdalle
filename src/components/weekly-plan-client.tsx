@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { generateWeeklyPlan, getWeeklyPlans, updateMealSlot, swapMeals } from "@/app/planning/actions";
 import Link from "next/link";
+import { toast } from "sonner";
 
 interface Recipe {
     id: string;
@@ -134,7 +135,7 @@ export function WeeklyPlanClient({
             await refreshData();
         } catch (error) {
             console.error("Error generating weekly plan:", error);
-            alert("Erreur lors de la generation. Veuillez reessayer.");
+            toast.error("Erreur lors de la génération. Réessaie.");
         } finally {
             setIsGenerating(false);
         }
@@ -150,7 +151,7 @@ export function WeeklyPlanClient({
                 await refreshData();
             } catch (error) {
                 console.error("Error adding meal:", error);
-                alert("Erreur lors de l'ajout du repas. Veuillez reessayer.");
+                toast.error("Erreur lors de l'ajout du repas. Réessaie.");
             }
         });
     };

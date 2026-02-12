@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { updateAvatarUrl } from "@/app/profile/actions";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 interface AvatarUploadProps {
     userId: string;
@@ -43,7 +44,7 @@ export function AvatarUpload({ userId, avatarUrl }: AvatarUploadProps) {
             setPreview(publicUrl);
         } catch (error) {
             console.error("Avatar upload failed:", error);
-            alert("Upload impossible. Réessaie.");
+            toast.error("Upload impossible. Réessaie.");
         } finally {
             setIsUploading(false);
         }

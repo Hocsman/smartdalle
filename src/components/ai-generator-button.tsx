@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Sparkles, Loader2, Lock } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 interface AiGeneratorButtonProps {
     recipeId?: string; // Optional if we just generate for fun, but usually attached to recipe
@@ -39,7 +40,7 @@ export function AiGeneratorButton({ recipeId, recipeName, isPremium, onImageGene
             router.refresh(); // Refresh to show new image if server rendered
         } catch (error) {
             console.error(error);
-            alert("Erreur lors de la génération. Vérifie ta connexion ou réessaie plus tard.");
+            toast.error("Erreur lors de la génération. Vérifie ta connexion ou réessaie plus tard.");
         } finally {
             setIsLoading(false);
         }

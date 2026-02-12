@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { createPortalSession } from "@/app/actions/create-portal-session";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 export function ManageSubscriptionButton() {
     const [loading, setLoading] = useState(false);
@@ -16,7 +17,7 @@ export function ManageSubscriptionButton() {
             }
         } catch (error) {
             console.error("Failed to open billing portal:", error);
-            alert("Impossible d'ouvrir le portail. Réessaie.");
+            toast.error("Impossible d'ouvrir le portail. Réessaie.");
         } finally {
             setLoading(false);
         }

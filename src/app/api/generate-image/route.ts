@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getOpenAIClient } from "@/lib/openai";
 import { createClient } from "@/utils/supabase/server";
+import { checkRateLimit, incrementRateLimit, formatRateLimitError } from "@/lib/rate-limit";
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -22,6 +23,25 @@ export async function POST(req: Request) {
 
     if (!profile?.is_premium) {
         return new NextResponse("Premium Required", { status: 403 });
+    }
+
+    // Rate limit check (image generation is expensive)
+    const rateLimit = await checkRateLimit(supabase, user.id, 'image_generation', true);
+    if (!rateLimit.allowed) {
+        return NextResponse.json(
+            {
+                error: 'RATE_LIMIT_EXCEEDED',
+                message: formatRateLimitError(rateLimit.resetAt),
+            },
+            {
+                status: 429,
+                headers: {
+                    'X-RateLimit-Limit': String(rateLimit.limit),
+                    'X-RateLimit-Remaining': String(rateLimit.remaining),
+                    'X-RateLimit-Reset': rateLimit.resetAt.toISOString(),
+                },
+            }
+        );
     }
 
     const { recipeName, recipeId } = await req.json();
@@ -69,6 +89,9 @@ export async function POST(req: Request) {
         if (recipeId) {
             await supabase.from("recipes").update({ image_url: publicUrl }).eq("id", recipeId);
         }
+
+        // Increment rate limit après succès
+        await incrementRateLimit(supabase, user.id, 'image_generation');
 
         return NextResponse.json({ url: publicUrl });
 
