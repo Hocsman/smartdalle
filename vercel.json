@@ -1,0 +1,16 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/notifications?type=meals",
+      "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/cron/notifications?type=expiry",
+      "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron/notifications?type=streak",
+      "schedule": "0 20 * * *"
+    }
+  ]
+}
