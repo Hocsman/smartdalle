@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Check, Trash2, ShoppingCart, Sparkles, Loader2, ChevronDown } from "lucide-react";
 import { toggleShoppingItem, deleteShoppingItem, clearShoppingList } from "@/app/actions/add-to-shopping-list";
 import { categorizeIngredient, CATEGORIES } from "@/utils/categories";
+import { OrderOnline } from "@/components/order-online";
 
 interface ShoppingItem {
     id: string;
@@ -26,6 +27,7 @@ export default function ShoppingListDb({ items }: ShoppingListDbProps) {
     const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set());
 
     const checkedCount = items.filter((item) => item.is_checked).length;
+    const uncheckedIngredients = items.filter((item) => !item.is_checked).map((item) => item.ingredient_name);
     const progress = items.length > 0 ? Math.round((checkedCount / items.length) * 100) : 0;
     const allChecked = checkedCount === items.length && items.length > 0;
 
@@ -255,6 +257,11 @@ export default function ShoppingListDb({ items }: ShoppingListDbProps) {
                         </Card>
                     );
                 })
+            )}
+
+            {/* Commander en ligne */}
+            {uncheckedIngredients.length > 0 && (
+                <OrderOnline ingredients={uncheckedIngredients} />
             )}
 
             {/* Tip */}
