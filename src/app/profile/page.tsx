@@ -10,6 +10,8 @@ import { NotificationButton } from "@/components/notification-settings";
 import { AvatarUpload } from "@/components/avatar-upload";
 import { ManageSubscriptionButton } from "@/components/ManageSubscriptionButton";
 import { SupportForm } from "@/components/support-form";
+import { BadgeDisplay } from "@/components/badge-display";
+import { getUserBadges } from "@/app/actions/badges";
 
 export const dynamic = "force-dynamic";
 
@@ -25,11 +27,10 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
 
     if (!user) return redirect("/login");
 
-    const { data: profile } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user.id)
-        .single();
+    const [{ data: profile }, earnedBadgeKeys] = await Promise.all([
+        supabase.from("profiles").select("*").eq("id", user.id).single(),
+        getUserBadges().catch(() => [] as string[]),
+    ]);
 
     return (
         <div className="min-h-screen gradient-bg p-6 md:p-10 pb-24 relative overflow-hidden">
@@ -78,6 +79,12 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                     <div className="mt-3">
                         <NotificationButton />
                     </div>
+                </section>
+
+                {/* Badges */}
+                <section className="bg-card/40 border border-input rounded-2xl p-6 space-y-4">
+                    <h2 className="text-lg font-bold text-white">Mes Badges</h2>
+                    <BadgeDisplay earnedBadgeKeys={earnedBadgeKeys} />
                 </section>
 
                 <form action={updateProfile} className="space-y-6 bg-card/40 border border-input rounded-2xl p-6">

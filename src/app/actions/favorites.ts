@@ -2,6 +2,7 @@
 
 import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
+import { checkAndAwardBadges } from "@/app/actions/badges";
 
 export async function toggleFavorite(recipeId: string) {
     const supabase = await createClient();
@@ -46,6 +47,10 @@ export async function toggleFavorite(recipeId: string) {
 
         revalidatePath("/dashboard");
         revalidatePath(`/recipes/${recipeId}`);
+
+        // Vérifier les badges après ajout d'un favori
+        await checkAndAwardBadges().catch(() => {});
+
         return { isFavorite: true };
     }
 }

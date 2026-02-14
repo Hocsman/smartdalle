@@ -11,6 +11,12 @@ import { getFavoriteIds } from "@/app/actions/favorites";
 import { getUserStreak } from "@/app/progress/actions";
 import { GenerateButton } from "@/components/GenerateButton";
 import { InstallPWAButton } from "@/components/install-pwa-guide";
+import { DashboardStreak } from "@/components/dashboard-streak";
+import { BadgeDisplay } from "@/components/badge-display";
+import { BadgeNotification } from "@/components/badge-notification";
+import { checkAndAwardBadges, getUserBadges } from "@/app/actions/badges";
+import { PersonalizedRecipes } from "@/components/personalized-recipes";
+import { getPersonalizedRecipes } from "@/app/actions/taste-profile";
 
 export const dynamic = "force-dynamic";
 
@@ -72,12 +78,19 @@ export default async function DashboardPage() {
     // Fetch User's Favorites
     const favoriteIds = await getFavoriteIds();
 
-    // Fetch User's Streak
+    // Fetch User's Streak + Badges + Suggestions
     let streak = 0;
+    let newBadgeKeys: string[] = [];
+    let earnedBadgeKeys: string[] = [];
+    let personalizedRecipes: Awaited<ReturnType<typeof getPersonalizedRecipes>> = [];
     try {
-        streak = await getUserStreak();
+        [streak, newBadgeKeys, earnedBadgeKeys, personalizedRecipes] = await Promise.all([
+            getUserStreak(),
+            checkAndAwardBadges().catch(() => [] as string[]),
+            getUserBadges().catch(() => [] as string[]),
+            getPersonalizedRecipes(6).catch(() => []),
+        ]);
     } catch {
-        // Fallback if table doesn't exist yet
         streak = 0;
     }
 
@@ -129,6 +142,23 @@ export default async function DashboardPage() {
                     Wesh <span className="text-white font-bold capitalize">{pseudo}</span>, voici ton fuel 🔥
                 </p>
 
+                {/* Streak */}
+                <DashboardStreak streak={streak} />
+
+                {/* Badge Notification (invisible, triggers toasts) */}
+                {newBadgeKeys.length > 0 && <BadgeNotification newBadgeKeys={newBadgeKeys} />}
+
+                {/* Badges débloqués */}
+                {earnedBadgeKeys.length > 0 && (
+                    <section>
+                        <div className="flex items-center gap-2 mb-3">
+                            <span className="w-2 h-8 bg-purple-500 rounded-sm inline-block"></span>
+                            <h2 className="text-2xl font-bold text-white">Mes Badges</h2>
+                        </div>
+                        <BadgeDisplay earnedBadgeKeys={earnedBadgeKeys} compact />
+                    </section>
+                )}
+
                 <section>
                     <div className="flex items-center gap-2 mb-4">
                         <span className="w-2 h-8 bg-yellow-400 rounded-sm inline-block"></span>
@@ -146,6 +176,17 @@ export default async function DashboardPage() {
                         <DailyPlanView plan={dailyPlan} recipes={plannedRecipes} />
                     </section>
                 ) : null}
+
+                {/* Pour Toi - Suggestions personnalisées */}
+                {personalizedRecipes.length > 0 && (
+                    <section>
+                        <div className="flex items-center gap-2 mb-4">
+                            <span className="w-2 h-8 bg-pink-500 rounded-sm inline-block"></span>
+                            <h2 className="text-2xl font-bold text-white">Pour Toi</h2>
+                        </div>
+                        <PersonalizedRecipes recipes={personalizedRecipes} favoriteIds={favoriteIds} />
+                    </section>
+                )}
 
                 {/* Recipe Discovery Section */}
                 <section>

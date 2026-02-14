@@ -2,6 +2,7 @@
 
 import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
+import { checkAndAwardBadges } from "@/app/actions/badges";
 
 // Types pour le suivi nutritionnel
 export interface NutritionLog {
@@ -195,6 +196,9 @@ export async function logMeal(
 
     revalidatePath("/progress");
     revalidatePath("/dashboard");
+
+    // Vérifier les badges après chaque repas loggé
+    await checkAndAwardBadges().catch(() => {});
 }
 
 // Mettre à jour les objectifs utilisateur
