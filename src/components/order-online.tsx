@@ -2,9 +2,8 @@
 
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { ExternalLink, ShoppingBag, ChevronDown } from "lucide-react";
-import { STORES, buildStoreSearchUrl, type StoreId } from "@/lib/affiliate";
+import { STORES, buildIngredientUrl, type Store } from "@/lib/affiliate";
 
 interface OrderOnlineProps {
     ingredients: string[];
@@ -12,18 +11,14 @@ interface OrderOnlineProps {
 
 export function OrderOnline({ ingredients }: OrderOnlineProps) {
     const [isExpanded, setIsExpanded] = useState(false);
+    const [selectedStore, setSelectedStore] = useState<Store>(STORES[0]);
 
     if (ingredients.length === 0) return null;
-
-    const handleStoreClick = (storeId: StoreId) => {
-        const url = buildStoreSearchUrl(storeId, ingredients);
-        window.open(url, "_blank", "noopener,noreferrer");
-    };
 
     return (
         <Card className="bg-card border-input overflow-hidden">
             <CardContent className="p-0">
-                {/* Header - toujours visible */}
+                {/* Header */}
                 <button
                     onClick={() => setIsExpanded(!isExpanded)}
                     className="w-full p-5 flex items-center justify-between cursor-pointer hover:bg-secondary/10 transition-colors"
@@ -35,46 +30,63 @@ export function OrderOnline({ ingredients }: OrderOnlineProps) {
                         <div className="text-left">
                             <h3 className="text-base font-bold text-white">Commander en ligne</h3>
                             <p className="text-xs text-muted-foreground">
-                                {ingredients.length} article{ingredients.length > 1 ? "s" : ""} restant{ingredients.length > 1 ? "s" : ""}
+                                {ingredients.length} article{ingredients.length > 1 ? "s" : ""} — cherche par ingrédient
                             </p>
                         </div>
                     </div>
                     <ChevronDown className={`h-5 w-5 text-muted-foreground transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`} />
                 </button>
 
-                {/* Store buttons */}
                 {isExpanded && (
-                    <div className="px-5 pb-5 space-y-3">
-                        <p className="text-xs text-muted-foreground">
-                            Fais tes courses en ligne avec ta liste pré-remplie :
-                        </p>
-
-                        <div className="grid gap-3">
+                    <div className="px-5 pb-5 space-y-4">
+                        {/* Store selector */}
+                        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
                             {STORES.map((store) => (
-                                <Button
+                                <button
                                     key={store.id}
-                                    variant="outline"
-                                    onClick={() => handleStoreClick(store.id as StoreId)}
-                                    className="w-full h-auto py-3 px-4 justify-between cursor-pointer hover:border-primary/50 transition-all group"
+                                    onClick={() => setSelectedStore(store)}
+                                    className={`
+                                        shrink-0 flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-bold
+                                        transition-all cursor-pointer
+                                        ${selectedStore.id === store.id
+                                            ? "bg-primary text-black border-primary"
+                                            : "bg-secondary/20 text-white border-input hover:border-primary/50"
+                                        }
+                                    `}
                                 >
-                                    <div className="flex items-center gap-3">
-                                        <span className="text-2xl">{store.logo}</span>
-                                        <div className="text-left">
-                                            <span className="font-bold text-white group-hover:text-primary transition-colors">
-                                                {store.name}
-                                            </span>
-                                            <span className="block text-xs text-muted-foreground">
-                                                Drive & Livraison
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                                </Button>
+                                    <span>{store.logo}</span>
+                                    <span>{store.name}</span>
+                                </button>
                             ))}
                         </div>
 
-                        <p className="text-[10px] text-muted-foreground/50 text-center pt-1">
-                            Tu seras redirigé vers le site du supermarché
+                        {/* Per-ingredient links */}
+                        <div className="space-y-2">
+                            {ingredients.map((ingredient, i) => {
+                                const url = buildIngredientUrl(selectedStore, ingredient);
+                                return (
+                                    <a
+                                        key={i}
+                                        href={url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="
+                                            flex items-center justify-between p-3 rounded-lg border border-input
+                                            bg-secondary/10 hover:bg-secondary/30 hover:border-primary/50
+                                            transition-all group cursor-pointer
+                                        "
+                                    >
+                                        <span className="text-sm text-white group-hover:text-primary transition-colors truncate">
+                                            {ingredient}
+                                        </span>
+                                        <ExternalLink className="h-3.5 w-3.5 text-muted-foreground group-hover:text-primary transition-colors shrink-0 ml-2" />
+                                    </a>
+                                );
+                            })}
+                        </div>
+
+                        <p className="text-[10px] text-muted-foreground/50 text-center">
+                            Chaque lien ouvre la recherche sur {selectedStore.name}
                         </p>
                     </div>
                 )}
